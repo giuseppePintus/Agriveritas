@@ -36,6 +36,15 @@ class Try1Spider(scrapy.Spider):
         with open(self.logFile, "a") as f:
             f.write(("\n" * aCapo) + toLog + "\n")
 
+    def JPnormalizeUrl(self, url):
+        lastC = str(url)[-1]
+        finishUrls = ['/', '//', '\\']
+        if not lastC in finishUrls:
+            url += '/'
+        return url
+
+    def pushUrl(self, url):
+        self.visited.add(url)
 
     def parse(self, response):
 
@@ -89,18 +98,23 @@ class Try1Spider(scrapy.Spider):
         #         self.visited.add(absolute_url)
         #         yield scrapy.Request(absolute_url, callback=self.parse)
         
+
         # Extract links and follow them if not visited before
-        links = response.css('a::attr(href)').getall()
-        for link in links:
-            absolute_url = response.urljoin(link)
-            parsed_url = urlparse(absolute_url)
-            self.log(str(link))
-            self.log(str(absolute_url))
-            self.log(str(parsed_url))
-            self.log(str(parsed_url.netloc))
-            if parsed_url.netloc == self.allowed_domains[0] and absolute_url not in self.visited:
-                self.visited.add(absolute_url)
-                yield scrapy.Request(absolute_url, callback=self.parse)
+        # Check if the response content is in text format
+        if response.headers.get('Content-Type', b'').startswith(b'text/html'):
+
+            links = response.css('a::attr(href)').getall()
+            for link in links:
+                tmpurl = response.urljoin(link)
+                absolute_url = self.JPnormalizeUrl(tmpurl)
+                parsed_url = urlparse(absolute_url)
+                self.log(str(link))
+                self.log(str(absolute_url))
+                self.log(str(parsed_url))
+                self.log(str(parsed_url.netloc))
+                if parsed_url.netloc == self.allowed_domains[0] and absolute_url not in self.visited:
+                    self.pushUrl(absolute_url)
+                    yield scrapy.Request(absolute_url, callback=self.parse)
 
     # def modify_a_tags(self, response):
     #     # Create a Selector from the response body

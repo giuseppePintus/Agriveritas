@@ -28,8 +28,6 @@ class Attemp3Pipeline(FilesPipeline):
         self.pdLogFile = open(self.logFile, "w")
         self.target_directory = spider.settings.get('FILES_STORE')
 
-
-
     def close_spider(self, spider):
         #super().close_spider(spider)
         self.pdLogFile.close()  
@@ -157,13 +155,18 @@ class Attemp3Pipeline(FilesPipeline):
         fileName = re.sub(invalid_chars, "_", fileName)
         if fileName == "":
             fileName = "index" # DA CONTROLLARE !!! 
-        typeOfFile = "html"
-        if "pdf" in contentType:
-            typeOfFile = "pdf"
+
+        # typeOfFile = "html"
+        # if "pdf" in contentType:
+        #     typeOfFile = "pdf"
         
-        if (not ".pdf" in fileName) and (not ".html" in fileName):
-            fileName += "." + typeOfFile
-        return  fileName 
+        # if (not ".pdf" in fileName) and (not ".html" in fileName):
+        #     fileName += "." + typeOfFile
+        
+        if "html" in contentType:
+            fileName += "." + "html"
+        
+        return fileName 
     
     def myFilePath(self, url):
         tmp = self.target_directory
