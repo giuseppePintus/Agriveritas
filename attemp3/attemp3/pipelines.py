@@ -15,7 +15,7 @@ from itemadapter import ItemAdapter
 
 class Attemp3Pipeline(FilesPipeline):
 
-    logFile = "myLog.txt"
+    logFile = "myLogPipeline.txt"
     pdLogFile = ""
     saveDir = ""
 
@@ -80,8 +80,8 @@ class Attemp3Pipeline(FilesPipeline):
             os.makedirs(self.myFilePath(urlCleaned))
        
         Path(self.getFullNamePath(urlCleaned, contentType)).write_bytes(resp.body)
-        tabR["nomeFileScaricato"] = self.myFileName(urlCleaned, contentType)
-        tabR["dirFileScaricato"] = self.myFilePath(urlCleaned)
+        tabR["fileDownloadedName"] = self.myFileName(urlCleaned, contentType)
+        tabR["fileDownloadedDir"] = self.myFilePath(urlCleaned)
 
         item["tableRow"] = tabR
 

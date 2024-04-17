@@ -35,7 +35,7 @@ class Try1Spider(scrapy.Spider):
 
     visited = set()  # Set to keep track of visited URLs
     counter = 0  # Counter for downloaded pages
-    amountToCrawl = 10
+    amountToCrawl = -1
 
 
     def log(self, toLog="", aCapo=0):
@@ -51,11 +51,11 @@ class Try1Spider(scrapy.Spider):
 
         requiredMainTableInfo = {
             "IDres" : hash_code,
-            "urlProvenienza" : response.url,
+            "urlFrom" : response.url,
             #"sito web provenienza": "",
             "HTTPStatus" : response.status,
-            "nomeFileScaricato": "",
-            "dirFileScaricato": "",
+            "fileDownloadedName": "",
+            "fileDownloadedDir": "",
             "timestampDownload" : time.time(),
             "timestampUpload" : "",
         }
@@ -78,27 +78,27 @@ class Try1Spider(scrapy.Spider):
 
         yield item
 
-        # # Increment the counter
-        # self.counter += 1
+        # Increment the counter
+        self.counter += 1
 
         # # Check if the counter reaches 10
         # if self.counter >= self.amountToCrawl:
         #     return
 
-        # # Extract links and follow them if not visited before
-        # links = response.css('a::attr(href)').getall()
-        # for link in links:
-        #     self.log(link)
-        #     self.log(response.url)
-        #     absolute_url = response.urljoin(link)
-        #     self.log(absolute_url)
-        #     self.log(aCapo=3)
-        #     if absolute_url not in self.visited:
-        #         self.visited.add(absolute_url)
-        #         yield scrapy.Request(absolute_url, callback=self.parse)
-        # #page = response.url.split("/")[-2]
-        # #filename = f"quotes-{page}.html"
-        # #Path(filename).write_bytes(response.body)
+        # Extract links and follow them if not visited before
+        links = response.css('a::attr(href)').getall()
+        for link in links:
+            # self.log(link)
+            # self.log(response.url)
+            absolute_url = response.urljoin(link)
+            # self.log(absolute_url)
+            # self.log(aCapo=3)
+            if absolute_url not in self.visited:
+                self.visited.add(absolute_url)
+                yield scrapy.Request(absolute_url, callback=self.parse)
+        #page = response.url.split("/")[-2]
+        #filename = f"quotes-{page}.html"
+        #Path(filename).write_bytes(response.body)
     
     def modify_a_tags(self, response):
         # Create a Selector from the response body
