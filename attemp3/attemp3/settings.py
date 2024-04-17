@@ -64,6 +64,7 @@ ROBOTSTXT_OBEY = True
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    "attemp3.pipelines.Attemp3Pipeline": 300,
+   "attemp3.pipeJinaRequest.JinaRequest": 301
 }
 
 FILES_STORE = "downloadR"

@@ -50,7 +50,7 @@ class Attemp3Pipeline(FilesPipeline):
         resp = item['response']
         tabR = item["tableRow"]
 
-        self.log(aCapo=3)
+        self.log(aCapo=2)
         self.log(" --- Analizzando l'header di risposta --- ")
         for x in resp.headers:
             self.log("-> " + str(x) + " _ " + str(resp.headers.get(x)))
@@ -64,9 +64,7 @@ class Attemp3Pipeline(FilesPipeline):
             self.log("Eccolo! -> " + str(last_modified.decode()))
             tabR["timestampUpload"] = last_modified.decode()
 
-        #self.log(self.file_path(item[""]))
 
-        #Path(self.file_path(resp.request, resp)).write_bytes(resp.body)
         urlCleaned = resp.url.split("//")[1]
         contentType = str(resp.headers.get('Content-Type'))
         if contentType is None:
@@ -153,24 +151,22 @@ class Attemp3Pipeline(FilesPipeline):
         # Replace invalid characters with "_"
         invalid_chars = r'[<>:"/\\|?*\x00-\x1F\x7F]'
         fileName = re.sub(invalid_chars, "_", fileName)
-        if fileName == "":
-            fileName = "index" # DA CONTROLLARE !!! 
 
-        # typeOfFile = "html"
-        # if "pdf" in contentType:
-        #     typeOfFile = "pdf"
+        if fileName == "":
+            fileName = "index.html" # DA CONTROLLARE !!! 
         
-        # if (not ".pdf" in fileName) and (not ".html" in fileName):
-        #     fileName += "." + typeOfFile
-        
-        if "html" in contentType:
+        if "html" in contentType and not "html" in fileName:
             fileName += "." + "html"
         
+        tollerance = 200
+        if len(fileName) > tollerance:
+            fileName = fileName[:tollerance] + "." + fileName.split(".")[-1]
+
         return fileName 
     
     def myFilePath(self, url):
         tmp = self.target_directory
-        for x in url.split("/")[:-1]:
+        for x in url.split("/"):
             tmp = os.path.join(tmp,x)
         return tmp
     
