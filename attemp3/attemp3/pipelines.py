@@ -19,6 +19,10 @@ class Attemp3Pipeline(FilesPipeline):
     pdLogFile = ""
     saveDir = ""
 
+    abortContentTypeRule = [b"text/html", b"application/pdf"]
+
+    mapperLongString = {}
+
     def log(self, toLog="", aCapo=0):
         print(toLog)
         self.pdLogFile.write(("\n" * aCapo) + toLog+"\n")
@@ -46,14 +50,18 @@ class Attemp3Pipeline(FilesPipeline):
         #     self.log(" -> Analizzando " + key1)
         #     for key in key1:
         #         self.log(" ---> key: %s , value: %s" % (str(key), str(key1[str(key)])))
-                
+
         resp = item['response']
         tabR = item["tableRow"]
+        doms = item["domains"]
 
         self.log(aCapo=2)
         self.log(" --- Analizzando l'header di risposta --- ")
         for x in resp.headers:
             self.log("-> " + str(x) + " _ " + str(resp.headers.get(x)))
+
+
+
 
         #Retrieve the Last-Modified header
         self.log()
@@ -65,27 +73,36 @@ class Attemp3Pipeline(FilesPipeline):
             tabR["timestampUpload"] = last_modified.decode()
 
 
+
+        #download page
         urlCleaned = resp.url.split("//")[1]
         contentType = str(resp.headers.get('Content-Type'))
+        desideredContentType = [None, "html", "pdf"]
+
         if contentType is None:
             contentType = "html"
 
-        self.log("######### " + self.getFullNamePath(urlCleaned, contentType))
+        fPath = self.myFilePath(urlCleaned, tabR["IDregion"], doms)
+        fName = self.myFileName(urlCleaned, contentType)
+        fPN = self.getFullNamePath(urlCleaned, contentType,tabR["IDregion"], doms)
 
-        if not os.path.exists(self.myFilePath(urlCleaned)):
-            os.makedirs(self.myFilePath(urlCleaned))
-       
-        Path(self.getFullNamePath(urlCleaned, contentType)).write_bytes(resp.body)
-        tabR["fileDownloadedName"] = self.myFileName(urlCleaned, contentType)
-        tabR["fileDownloadedDir"] = self.myFilePath(urlCleaned)
+        self.log("######### " + fPN)
+        if not os.path.exists(fPath):
+            os.makedirs(fPath)
+        
+        # if any(desired_type in contentType for desired_type in desideredContentType):
+            # if re
+        Path(fPN).write_bytes(resp.body)
+        tabR["fileDownloadedName"] = fName
+        tabR["fileDownloadedDir"] = fPath
+        
+        
+        # else:
+        #     # do something else
+        #     tabR["aborted"] = True
+        #     tabR["abortReason"] = "Content tipe is not somethig like" + str(desideredContentType[1:])
 
         item["tableRow"] = tabR
-
-        # self.log(" --- Analizzando i campi POST-DOWNLOAD --- ")
-        # for key1 in item:
-        #     self.log(" -> Analizzando " + key1)
-        #     for key in key1:
-        #         self.log(" ---> key: %s , value: %s" % (key, item[key]))
         self.log("Analizzando i risultati")
         for key in item:
             self.log("key: %s , value: %s" % (key, item[key]))
@@ -94,58 +111,6 @@ class Attemp3Pipeline(FilesPipeline):
         return item
 
 
-    '''
-    def process_itemOLD1(self, item, spider):
-        self.log("CIAO")
-        self.log(str(item))
-        self.log(self.target_directory)
-        self.log(str(type(item['response'])) + str(item['response']))
-        
-        self.log("Analizzando la risorsa")
-        resp = item['response']
-        self.log(resp.url)
-        self.log(self.file_path(resp.request, resp))
-        self.log(str(resp.headers))
-        self.log("")
-        self.log("Analizzando l'hash-code")
-        id = item["IDres"]
-        self.log(str(type(id)) + " - " + str(id))
-        self.log()
-        self.log()
-        self.log()
-
-        for x in resp.headers:
-            self.log("-> " + str(x) + " _ " + str(resp.headers.get(x)))
-
-        #Retrieve the Last-Modified header
-        last_modified = resp.headers.get('Last-Modified')
-        self.log("çççççççççç " + str(last_modified))
-        if last_modified:
-            self.log("çççççççççç " + str(last_modified.decode()))
-            item['last_modified'] = last_modified.decode()
-    
-        for key in item:
-            self.log("key: %s , value: %s" % (key, item[key]))
-        #self.log(self.file_path(item[""]))
-
-        #Path(self.file_path(resp.request, resp)).write_bytes(resp.body)
-        urlCleaned = resp.url.split("//")[1]
-        contentType = str(resp.headers.get('Content-Type'))
-        if contentType is None:
-            contentType = "html"
-
-        self.log("######### " + self.getFullNamePath(urlCleaned, contentType))
-
-        if not os.path.exists(self.myFilePath(urlCleaned)):
-            os.makedirs(self.myFilePath(urlCleaned))
-       
-        Path(self.getFullNamePath(urlCleaned, contentType)).write_bytes(resp.body)
-
-        self.log("  #########" * 10)
-
-        return item
-    '''
-    
     def myFileName(self, url, contentType):
         fileName = url.split("/")[-1]
         # Replace invalid characters with "_"
@@ -164,14 +129,31 @@ class Attemp3Pipeline(FilesPipeline):
 
         return fileName 
     
-    def myFilePath(self, url):
-        tmp = self.target_directory
+    def myFilePath(self, url, idR, toPreserve=[]):
+        tmp = self.target_directory + idR
+        upperbound = 10
         for x in url.split("/"):
+            # if not x in toPreserve and len(x) > upperbound:
+            #     if x in self.mapperLongString.keys():
+            #         x = self.mapperLongString[x]
+            #     else:
+            #         hv = hash(x)
+            #         toMod = -1 * hv if hv < 0 else hv
+            #         mod = (str(toMod)*5)[:upperbound]
+            #         self.log("WOW, ha oltrepassato il limite!" + x + " -> " + tmp)
+            #         self.mapperLongString[x] = mod
+            #         x = mod
+                    
             tmp = os.path.join(tmp,x)
+        
+        self.log("%%%%%%%%%%%%%%%%%%%%%%%")
+        self.log(str(url) + "  " + tmp)
+        self.log("%%%%%%%%%%%%%%%%%%%%%%%")
+
         return tmp
     
-    def getFullNamePath(self, url, contentType):
-        return os.path.join(self.myFilePath(url), self.myFileName(url, contentType))
+    def getFullNamePath(self, url, contentType, idR, toPreserve=[]):
+        return os.path.join(self.myFilePath(url,idR,toPreserve=toPreserve), self.myFileName(url, contentType))
 
     
     

@@ -67,7 +67,7 @@ ITEM_PIPELINES = {
    "attemp3.pipeJinaRequest.JinaRequest": 301
 }
 
-FILES_STORE = "downloadR"
+FILES_STORE = "download"
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

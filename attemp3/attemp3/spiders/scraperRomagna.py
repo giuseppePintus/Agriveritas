@@ -7,8 +7,8 @@ from scrapy.selector import Selector
 from urllib.parse import urlparse
 
 
-class Try1Spider(scrapy.Spider):
-    name = 'try'
+class ERSpired(scrapy.Spider):
+    name = 'scraperER'
     
     start_urls = [
         "https://agrea.regione.emilia-romagna.it/",
@@ -62,19 +62,23 @@ class Try1Spider(scrapy.Spider):
 
         requiredMainTableInfo = {
             "IDres" : hash_code,
+            "IDregion" : "ER",
             "urlFrom" : response.url, #"sito web provenienza": "",
             "HTTPStatus" : response.status,
             "fileDownloadedName": "",
             "fileDownloadedDir": "",
             "timestampDownload" : time.time(),
             "timestampUpload" : "",
+            
+            "aborted" : False,
+            "abortReason": ""
         }
-
         
 
         item = {
             "response": response,
-            "tableRow" : requiredMainTableInfo
+            "tableRow" : requiredMainTableInfo,
+            "domains" : self.allowed_domains
         }
 
         # # Modify the <a> tags in the downloaded file
@@ -90,8 +94,33 @@ class Try1Spider(scrapy.Spider):
         self.log(str(response))
         self.log("")
 
+
+        
         yield item
 
+        # Extract links and follow them if not visited before
+        # Check if the response content is in text format
+        if response.headers.get('Content-Type', b'').startswith(b'text/html'):
+
+#            if urlparse(response.url).netloc == self.allowed_domains[0]:
+            links = response.css('a::attr(href)').getall()
+            for link in links:
+                tmpurl = response.urljoin(link)
+                absolute_url = self.JPnormalizeUrl(tmpurl)
+                parsed_url = urlparse(absolute_url)
+                self.log("°°°°°°°°°°°°°°°°")
+                self.log(str(link))
+                self.log(str(absolute_url))
+                self.log(str(parsed_url))
+                self.log(str(parsed_url.netloc))
+                self.log("°°°°°°°°°°°°°°°°", aCapo=2)
+                #if absolute_url not in self.visited:
+                if parsed_url.netloc == self.allowed_domains[0] and absolute_url not in self.visited:
+                    self.pushUrl(absolute_url)
+                    yield scrapy.Request(absolute_url, callback=self.parse)
+
+
+        #yield self.crawlingRule1(response=response)
         # # Increment the counter
         # self.counter += 1
 
@@ -109,13 +138,14 @@ class Try1Spider(scrapy.Spider):
         #     # self.log(aCapo=3)
         #     if absolute_url not in self.visited:
         #         self.visited.add(absolute_url)
-        #         yield scrapy.Request(absolute_url, callback=self.parse)
-        
+        #         yield scrapy.Request(absolute_url, callback=self.parse)     
 
+    def crawlingRule1(self, response):
         # Extract links and follow them if not visited before
         # Check if the response content is in text format
         if response.headers.get('Content-Type', b'').startswith(b'text/html'):
 
+#            if urlparse(response.url).netloc == self.allowed_domains[0]:
             links = response.css('a::attr(href)').getall()
             for link in links:
                 tmpurl = response.urljoin(link)
@@ -127,9 +157,32 @@ class Try1Spider(scrapy.Spider):
                 self.log(str(parsed_url))
                 self.log(str(parsed_url.netloc))
                 self.log("°°°°°°°°°°°°°°°°", aCapo=2)
+                #if absolute_url not in self.visited:
                 if parsed_url.netloc == self.allowed_domains[0] and absolute_url not in self.visited:
                     self.pushUrl(absolute_url)
                     yield scrapy.Request(absolute_url, callback=self.parse)
+
+    def crawlingRule2(self, response):
+        # Extract links and follow them if not visited before
+        # Check if the response content is in text format
+        if response.headers.get('Content-Type', b'').startswith(b'text/html'):
+
+            if urlparse(response.url).netloc == self.allowed_domains[0]:
+                links = response.css('a::attr(href)').getall()
+                for link in links:
+                    tmpurl = response.urljoin(link)
+                    absolute_url = self.JPnormalizeUrl(tmpurl)
+                    parsed_url = urlparse(absolute_url)
+                    self.log("°°°°°°°°°°°°°°°°")
+                    self.log(str(link))
+                    self.log(str(absolute_url))
+                    self.log(str(parsed_url))
+                    self.log(str(parsed_url.netloc))
+                    self.log("°°°°°°°°°°°°°°°°", aCapo=2)
+                    if absolute_url not in self.visited:
+                    #if parsed_url.netloc == self.allowed_domains[0] and absolute_url not in self.visited:
+                        self.pushUrl(absolute_url)
+                        yield scrapy.Request(absolute_url, callback=self.parse)
 
     # def modify_a_tags(self, response):
     #     # Create a Selector from the response body
