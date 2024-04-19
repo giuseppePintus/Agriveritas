@@ -7,14 +7,20 @@ from scrapy.selector import Selector
 from urllib.parse import urlparse
 
 
-class VenetoSpider(scrapy.Spider):
-    name = 'scraperVeneto'
+class ERSpider(scrapy.Spider):
+    name = 'spiERSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS'
     
     start_urls = [
-        "https://www.avepa.it/",
+        "https://agrea.regione.emilia-romagna.it/",
+        # "https://agrea.regione.emilia-romagna.it/agenzia/allegati-agenzia/certificate-signed.pdf/@@download/file/certificate-signed.pdf"
+
+        #"https://agreagestione.regione.emilia-romagna.it/opendocument/normativa/download-file?id=13262&version=1"
+        # "https://agrea.regione.emilia-romagna.it/agenzia/sicurezza-delle-informazioni/allegati-sicurezza-delle-informazioni/pl_01_politica-della-sicurezza-delle-informazioni_8.pdf/@@download/file/PL_01_Politica%20della%20sicurezza%20delle%20informazioni_8.pdf",
+        # "https://servizissiir.regione.emilia-romagna.it/deliberegiunta/servlet/AdapterHTTP?action_name=ACTIONRICERCADELIBERE&operation=downloadTesto&codProtocollo=DAG/2023/1482&ENTE=2"
+        #"https://quotes.toscrape.com/page/1/",
     ]
 
-    allowed_domains = ['www.avepa.it']
+    allowed_domains = ['agrea.regione.emilia-romagna.it']
 
     logFile = "myLogSpider.txt"
     pdLogFile = ""
@@ -37,26 +43,37 @@ class VenetoSpider(scrapy.Spider):
         if lastC in finishUrls: # and len(url.split("/")[-1].split(".")) == 1:
             toRet = url[:-1]
         return toRet
+    
+        # lastC = str(url)[-1]
+        # finishUrls = ['/', '//', '\\']
+        # self.log("@@ -> " + url + "   " + str(len(url.split("."))))
+        # if not lastC in finishUrls and len(url.split("/")[-1].split(".")) == 1:
+        #     url += '/'
+        
+        # return url
 
     def pushUrl(self, url):
         self.visited.add(url)
 
     def parse(self, response):
+
         # Compute the hash code of the response body
         hash_code = hashlib.sha256(response.body).hexdigest()
 
         requiredMainTableInfo = {
             "IDres" : hash_code,
-            "IDregion" : "V",
+            "IDregion" : "ER",
             "urlFrom" : response.url, #"sito web provenienza": "",
             "HTTPStatus" : response.status,
             "fileDownloadedName": "",
             "fileDownloadedDir": "",
             "timestampDownload" : time.time(),
             "timestampUpload" : "",
+            
             "aborted" : False,
             "abortReason": ""
         }
+        
 
         item = {
             "response": response,
@@ -64,20 +81,24 @@ class VenetoSpider(scrapy.Spider):
             "domains" : self.allowed_domains
         }
 
+        # # Modify the <a> tags in the downloaded file
+        # if response.headers.get('Content-Type', b'').startswith(b'text/html'):
+        #     modified_body = self.modify_a_tags(response)
+        #     item['response'] = response.replace(body=modified_body)
+
         self.log("NUOVO FILE")
         if str(response.url).endswith(".html"):
-            self.log("mmmmmmmmmmm " + str(response.url))
+            self.log("ooooooooo " + str(response.url))
             
         self.log(str(item))
         self.log(str(response))
         self.log("")
 
+
+        
         yield item
 
-        #self.crawlingRule1(response)
-
         # Extract links and follow them if not visited before
-        #self.log("MI PASSI O NON MI PASSI")
         # Check if the response content is in text format
         if response.headers.get('Content-Type', b'').startswith(b'text/html'):
 
@@ -99,12 +120,28 @@ class VenetoSpider(scrapy.Spider):
                     yield scrapy.Request(absolute_url, callback=self.parse)
 
 
+        #yield self.crawlingRule1(response=response)
+        # # Increment the counter
+        # self.counter += 1
 
+        # # # Check if the counter reaches 10
+        # # if self.counter >= self.amountToCrawl:
+        # #     return
 
+        # # Extract links and follow them if not visited before
+        # links = response.css('a::attr(href)').getall()
+        # for link in links:
+        #     # self.log(link)
+        #     # self.log(response.url)
+        #     absolute_url = response.urljoin(link)
+        #     # self.log(absolute_url)
+        #     # self.log(aCapo=3)
+        #     if absolute_url not in self.visited:
+        #         self.visited.add(absolute_url)
+        #         yield scrapy.Request(absolute_url, callback=self.parse)     
 
     def crawlingRule1(self, response):
         # Extract links and follow them if not visited before
-        self.log("MI PASSI O NON MI PASSI")
         # Check if the response content is in text format
         if response.headers.get('Content-Type', b'').startswith(b'text/html'):
 

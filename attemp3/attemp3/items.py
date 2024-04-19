@@ -6,7 +6,40 @@
 import scrapy
 
 
-class Attemp3Item(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class TableRowInfos(scrapy.Item):
+    IDuni = scrapy.Field()
+    cod_reg = scrapy.Field()
+    url_from = scrapy.Field()
+    HTTPStatus = scrapy.Field()
+    hash_code = scrapy.Field()
+    
+    file_downloaded_name = scrapy.Field()
+    file_downloaded_dir = scrapy.Field()
+    timestamp_download = scrapy.Field()
+    timestamp_mod_author = scrapy.Field()
+    
+
+class SettingsElement(scrapy.Item):
+    aborted = scrapy.Field()
+    abortReason = scrapy.Field()
+    allowedContentType = scrapy.Field()
+
+    def __init__(self):
+        super().__init__()
+        self["aborted"] = False
+
+
+
+class WebDownloadedElement(scrapy.Item):
+    response = scrapy.Field()
+    tableRow = TableRowInfos() #requiredMainTableInfo,
+    domains = scrapy.Field()
+    settingPart = SettingsElement()
+
+    # def __init__(self, response, domains):
+    #     super().__init__()
+    #     self['response'] = response
+    #     self['domains'] = domains
+    #     self['tableRow'] = TableRowInfos()
+    #     self['settingPart'] = SettingsElement()
+    

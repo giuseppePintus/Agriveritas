@@ -63,8 +63,9 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "attemp3.pipelines.Attemp3Pipeline": 300,
-   "attemp3.pipeJinaRequest.JinaRequest": 301
+    "attemp3.pipeDownload.PipeDownload": 200,
+   # "attemp3.pipelines.Attemp3Pipeline": 300,
+    "attemp3.pipeJinaRequest.JinaRequest": 201
 }
 
 FILES_STORE = "download"
@@ -94,3 +95,56 @@ FILES_STORE = "download"
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+
+
+
+
+
+# Enable logging
+LOG_LEVEL = "DEBUG"  # Set to "INFO" or "WARNING" if you want less verbosity
+
+# Set the log file and log format
+LOG_FILE = "scrapy.log"
+LOG_FORMAT = "%(asctime)s [%(name)s:%(levelname)s] %(message)s"
+
+# Enable or disable HTTP compression
+HTTP_COMPRESSION_ENABLED = True
+HTTP_COMPRESSION_ALGORITHMS = ["gzip", "deflate"]
+
+# Set the user agent rotation strategy
+USER_AGENT_ROTATION_ENABLED = True
+USER_AGENT_ROTATION_STRATEGY = "random"  # or "custom" if you have a custom rotation list
+
+# # Set the maximum depth of crawling
+# DEPTH_LIMIT = 2
+
+# # Set the maximum number of pages to be scraped
+# MAX_PAGES_TO_CRAWL = 100
+
+# Set the maximum number of concurrent requests
+CONCURRENT_REQUESTS = 32
+
+# Set the maximum number of concurrent requests per domain
+CONCURRENT_REQUESTS_PER_DOMAIN = 4
+
+# Set the maximum number of concurrent requests per IP
+CONCURRENT_REQUESTS_PER_IP = 2
+
+# # Set the download delay between requests
+# DOWNLOAD_DELAY = 2
+
+# Set the retry delay for failed requests
+RETRY_DELAY = 5
+
+# Set the retry requests for failed requests
+RETRY_TIMES = 3
+
+# Set the custom user agent
+CUSTOM_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+
+# Set the custom headers
+CUSTOM_HEADERS = {
+    "Accept": "text/html,application/xhtml+xml,application/xml,application/pdf"#q=0.9,*/*;q=0.8",
+   #  "Accept-Language": "en-US,en;q=0.5",
+}

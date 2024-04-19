@@ -12,7 +12,6 @@ import re
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 
-
 class Attemp3Pipeline(FilesPipeline):
 
     logFile = "myLogPipeline.txt"
@@ -29,6 +28,7 @@ class Attemp3Pipeline(FilesPipeline):
 
     def open_spider(self, spider):
         super().open_spider(spider)
+        spider
         self.pdLogFile = open(self.logFile, "w")
         self.target_directory = spider.settings.get('FILES_STORE')
 
