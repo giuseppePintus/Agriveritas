@@ -54,13 +54,20 @@ class JinaRequest(PipeInterface):
         a = item.tableRow["file_downloaded_name"] 
         self.log(a)
         if a.endswith("html"):
-            self.makeReq(item.tableRow["url_from"])
+            cleanedText = self.makeReq(item.tableRow["url_from"])
+            
+            if cleanedText != "":
+                fDir = item.tableRow["file_downloaded_dir"] 
+                fName = item.tableRow["file_downloaded_name"][:-4] + "txt"
+                filePath = os.path.join(fDir, fName)
+                with open(filePath, "w", encoding="utf-8") as f:
+                    f.write(cleanedText)
+        # resp = item['response']
+        # tabR = item["tableRow"]
+
         else:
             self.log("NON posso usare Jina!")
         self.log(aCapo=3)
-        
-        # resp = item['response']
-        # tabR = item["tableRow"]
 
         return item
     
@@ -68,59 +75,13 @@ class JinaRequest(PipeInterface):
         basicUrl = "r.jina.ai"
         apiUrl = f"https://{basicUrl}/{url}"
         response = requests.get(apiUrl)
+        res = ""
 
         # The status code will be 200 if the request was successful
         if response.status_code == 200:
             self.log(response.text)
+            res = response.text    
         else:
             self.log(f"Request failed with status code {response.status_code}")
 
-    
-    def makeReqOLD(self, url):
-        basicUrl = "r.jina.ai"
-        apiUrl = f"https://{basicUrl}/{url}"
-        self.log(apiUrl)
-
-        conn = http.client.HTTPSConnection(basicUrl)
-        # headers = {"Authorization": "Bearer YOUR_TOKEN"}
-        headers = {"Accept": "text/event-stream"}
-
-        conn.request("GET", f"/{url}", headers=headers)
-        response = conn.getresponse()
-
-        
-
-        if response.status == 200:
-            json_content = json.dumps(response.read().decode("unicode_escape"))
-            b = json.loads(json_content)
-            self.log(str(b))
-            # a = "{" + response.read().decode("unicode_escape") + "}"
-            # b = json.loads(a)
-            # self.log(b)
-            # # self.log(response.read().decode("utf-8"))
-            # #self.log(#.decode("unicode_escape"))
-            # # response.read().d
-            # # data = json.loads()
-            
-            # # content = data["content"]
-            # # self.log(content)
-            # # data = json.loads(response.read().decode("utf-8"))
-            # # data = response.read()
-            # # self.log(data)
-        else:
-            self.log(f"Request failed with status code {response.status}")
-
-        # basicUrl = "https://r.jina.ai/" + url
-        # self.log(basicUrl)
-
-        # conn = http.client.HTTPSConnection(basicUrl)
-        # headers = {"Authorization": "Bearer YOUR_TOKEN"}
-
-        # conn.request("GET")
-        # response = conn.getresponse()
-
-        if response.status == 200:
-            data = json.loads(response.read().decode("utf-8"))
-            self.log(data)
-        else:
-            self.log(f"Request failed with status code {response.status}")
+        return res

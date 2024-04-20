@@ -37,6 +37,8 @@ if [[ ($# > 0) ]]; then
         if [[ ($2 == "C") ]]; then
             rm -r downloadER
             rm *ER.txt
+            rm *.csv
+            rm *.json
         fi
         scrapy crawl spiER --logfile JPSLogER.txt
     fi

@@ -53,6 +53,8 @@ class PipeDownload(PipeInterface):
         tabR = item.tableRow
         settings = item.settingPart
 
+        settings["abortReason"]
+
         self.log(aCapo=2)
         self.log(" --- Analizzando l'header di risposta --- ")
         for x in resp.headers:
@@ -63,6 +65,7 @@ class PipeDownload(PipeInterface):
         self.log(" --- prendendo il timestampUpload --- ")
         last_modified = resp.headers.get('Last-Modified')
         self.log(" " + str(last_modified))
+        tabR["timestamp_mod_author"] = "" #defaul value
         if last_modified:
             self.log("Eccolo! -> " + str(last_modified.decode()))
             tabR["timestamp_mod_author"] = last_modified.decode()

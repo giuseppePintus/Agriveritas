@@ -4,6 +4,8 @@
 *log*.txt
 *Log*.txt
 download*/
+*.csv
+*.json
 
 
 ### Python ###

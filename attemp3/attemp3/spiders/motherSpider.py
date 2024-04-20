@@ -59,14 +59,16 @@ class BaseSpider(Spider):
 
 
 
-
+    counter = 0
 
     def create_item(self, response : Response, hash_code):
         item = WebDownloadedElement()
 
         item["response"] = response
 
-        item.tableRow["IDuni"] = 0
+        item.tableRow["IDuni"] = self.counter
+        self.counter = self.counter + 1
+        
         #cod_reg -> ci pensa complete
         item.tableRow["url_from"] = str(response.url)
         item.tableRow["HTTPStatus"] = response.status
@@ -78,7 +80,7 @@ class BaseSpider(Spider):
 
         #item.settingPart
         # aborted = scrapy.Field()
-        # abortReason = scrapy.Field()
+        item.settingPart["abortReason"] = ""
         item.settingPart["allowedContentType"] = [] #["html", "pdf"] # scrapy.Field()
 
         self.complete_inizialization(item)
