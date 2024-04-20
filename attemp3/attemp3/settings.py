@@ -65,7 +65,9 @@ ROBOTSTXT_OBEY = True
 ITEM_PIPELINES = {
     "attemp3.pipeDownload.PipeDownload": 200,
    # "attemp3.pipelines.Attemp3Pipeline": 300,
-    "attemp3.pipeJinaRequest.JinaRequest": 201
+    "attemp3.pipeJinaRequest.JinaRequest": 201,
+    "attemp3.pipeCsvResults.CsvPipeline" : 900,
+    "attemp3.pipeJsonResults.JsonPipeline" : 901,
 }
 
 FILES_STORE = "download"
@@ -120,7 +122,7 @@ USER_AGENT_ROTATION_STRATEGY = "random"  # or "custom" if you have a custom rota
 # DEPTH_LIMIT = 2
 
 # # Set the maximum number of pages to be scraped
-# MAX_PAGES_TO_CRAWL = 100
+MAX_PAGES_TO_CRAWL = 1
 
 # Set the maximum number of concurrent requests
 CONCURRENT_REQUESTS = 32
@@ -134,8 +136,8 @@ CONCURRENT_REQUESTS_PER_IP = 2
 # # Set the download delay between requests
 # DOWNLOAD_DELAY = 2
 
-# Set the retry delay for failed requests
-RETRY_DELAY = 5
+# # Set the retry delay for failed requests
+# RETRY_DELAY = 5
 
 # Set the retry requests for failed requests
 RETRY_TIMES = 3
