@@ -37,12 +37,14 @@ class BaseSpider(Spider):
             return url[:-1]
         return url
     
+    counter = 0
+
     def parse(self, response):
         # Common parsing logic
         hash_code = hashlib.sha256(response.body).hexdigest()
         item = self.create_item(response, hash_code)
         
-        self.log("START PROCESSING NEW FILE")
+        self.log("START PROCESSING NEW FILE ${self.counter}")
 
         yield item
         if response.headers.get('Content-Type', b'').startswith(b'text/html'):
@@ -57,9 +59,6 @@ class BaseSpider(Spider):
                 yield Request(absolute_url, callback=self.parse)
 
 
-
-
-    counter = 0
 
     def create_item(self, response : Response, hash_code):
         item = WebDownloadedElement()
