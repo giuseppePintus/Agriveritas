@@ -34,6 +34,9 @@ class PipeDownload(PipeInterface):
     #     self.pdLogFile.close()  
 
 
+    
+    
+
     def process_item(self, item : WebDownloadedElement, spider):
         self.log("")
         self.log(" ### INIZIO NUOVO FILE ### ")
@@ -70,19 +73,25 @@ class PipeDownload(PipeInterface):
             self.log("Eccolo! -> " + str(last_modified.decode()))
             tabR["timestamp_mod_author"] = last_modified.decode()
 
-
-
         #download page
         urlCleaned = resp.url.split("//")[1]
         contentType = str(resp.headers.get('Content-Type'))
-        # desideredContentType = [None, "html", "pdf"]
-
-        # if contentType is None:
-        #     contentType = "html"
 
         fPath = self.myFilePath(urlCleaned, tabR["cod_reg"], doms)
         fName = self.myFileName(urlCleaned, contentType)
         fPN = self.getFullNamePath(urlCleaned, contentType, tabR["cod_reg"], doms)
+
+        allowedContentType = settings["allowedContentType"]
+        if len(allowedContentType) != 0:
+            extension = fName[-6:]
+            if not any(aCT in extension for aCT in allowedContentType):
+                return self.skipElementForContentType(item)
+
+        # desideredContentType = [None, ]
+
+        # if contentType is None:
+        #     contentType = "html"
+
 
         self.log("######### " + fPN)
         if not os.path.exists(fPath):
@@ -94,19 +103,16 @@ class PipeDownload(PipeInterface):
         tabR["file_downloaded_name"] = fName
         tabR["file_downloaded_dir"] = fPath
         
-        
-        # # else:
-        # #     # do something else
-        # #     tabR["aborted"] = True
-        # #     tabR["abortReason"] = "Content tipe is not somethig like" + str(desideredContentType[1:])
-
-        # item["tableRow"] = tabR
-        # self.log("Analizzando i risultati")
-        # for key in item:
-        #     self.log("key: %s , value: %s" % (key, item[key]))
-
         self.log(aCapo=7)
         return item
+    
+    def skipElementForContentType(self, item : WebDownloadedElement):
+        item.settingPart["aborted"] = True
+        item.settingPart["abortReason"] = "This element is not a type into " + item.settingPart["allowedContentType"]
+        return item
+    
+    def behaviour_skipped(self, item : WebDownloadedElement, spider):
+        self.log("Skipped element")
 
 
     def myFileName(self, url, contentType):
@@ -128,7 +134,7 @@ class PipeDownload(PipeInterface):
         return fileName 
     
     def myFilePath(self, url, idR, toPreserve=[]):
-        tmp = self.target_directory + idR
+        tmp = os.path.join(self.target_directory,idR)
         upperbound = 10
         for x in url.split("/"):
             if not x in toPreserve and len(x) > upperbound:
@@ -138,7 +144,7 @@ class PipeDownload(PipeInterface):
                     hv = hash(x)
                     toMod = -1 * hv if hv < 0 else hv
                     mod = (str(toMod)*5)[:upperbound]
-                    self.log("WOW, ha oltrepassato il limite!" + x + " -> " + tmp)
+                    self.log("WOW, ha oltrepassato il limite!" + x + " -> " + mod)
                     self.mapperLongString[x] = mod
                     x = mod
                     

@@ -44,7 +44,7 @@ class BaseSpider(Spider):
         hash_code = hashlib.sha256(response.body).hexdigest()
         item = self.create_item(response, hash_code)
         
-        self.log("START PROCESSING NEW FILE ${self.counter}")
+        self.log(f"START PROCESSING NEW FILE {self.counter}")
 
         yield item
         if response.headers.get('Content-Type', b'').startswith(b'text/html'):
@@ -80,7 +80,7 @@ class BaseSpider(Spider):
         #item.settingPart
         # aborted = scrapy.Field()
         item.settingPart["abortReason"] = ""
-        item.settingPart["allowedContentType"] = [] #["html", "pdf"] # scrapy.Field()
+        item.settingPart["allowedContentType"] = ["html", "pdf"] # scrapy.Field()
 
         self.complete_inizialization(item)
         return item

@@ -33,6 +33,9 @@ class JsonPipeline(PipeInterface):
             json.dump(row, self.file, indent=4)
             self.file.write('\n')  # add a newline between each JSON object
         return item
+    
+    def behaviour_skipped(self, item : WebDownloadedElement, spider):
+        self.log("So no JSON element created")
 
     def close_spider(self, spider):
         try:

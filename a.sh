@@ -1,2 +1,2 @@
 cd attemp3
-w.sh R C
+w.sh V C

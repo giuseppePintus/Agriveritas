@@ -48,5 +48,8 @@ class CsvPipeline(PipeInterface):
             }
             self.exporter.writerow(row)
         return item
+    
 
+    def behaviour_skipped(self, item : WebDownloadedElement, spider):
+        self.log("So no CVS row created")
     

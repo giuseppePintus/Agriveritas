@@ -29,13 +29,13 @@
 if [[ ($# > 0) ]]; then
     if [[ ($1 == "C") ]]; then
         echo "TRY"
-        rm -r downloadER
-        rm -r downloadV
+        rm -r download/ER
+        rm -r download/V
         rm *Log*.txt
     fi
     if [[ ($1 == "R") ]]; then
         if [[ ($2 == "C") ]]; then
-            rm -r downloadER
+            rm -r download/ER
             rm *ER.txt
             rm *.csv
             rm *.json
@@ -44,8 +44,10 @@ if [[ ($# > 0) ]]; then
     fi
     if [[ ($1 == "V") || ($2 == "V") ]]; then
         if [[ ($2 == "C") ]]; then
-            rm -r downloadV
+            rm -r download/V
             rm *V.txt
+            rm *.csv
+            rm *.json
         fi
         scrapy crawl spiV --logfile JPSLogV.txt
         # scrapy crawl scraperVeneto --logfile JPSLog.txt
