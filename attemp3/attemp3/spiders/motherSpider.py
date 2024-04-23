@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from attemp3.items import WebDownloadedElement
 import os
 import time
+import datetime
 
 class BaseSpider(Spider):
     # Common attributes can be defined here if they are shared across spiders
@@ -39,12 +40,18 @@ class BaseSpider(Spider):
     
     counter = 0
 
+    
+    lastTimestamp = 0
+
     def parse(self, response):
         # Common parsing logic
         hash_code = hashlib.sha256(response.body).hexdigest()
         item = self.create_item(response, hash_code)
-        
-        self.log(f"START PROCESSING NEW FILE {self.counter}")
+        timestamp = time.time()
+        human_readable_timestamp = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        # self.log(f"FILE N {self.counter} - Time {human_readable_timestamp} [{timestamp} > {timestamp - self.lastTimestamp}]")
+        self.log(f"FILE N {self.counter} - Time {human_readable_timestamp} [{timestamp - self.lastTimestamp}] / {response.url}")
+        self.lastTimestamp = timestamp
 
         yield item
         if response.headers.get('Content-Type', b'').startswith(b'text/html'):

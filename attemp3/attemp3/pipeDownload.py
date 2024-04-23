@@ -6,6 +6,7 @@ from attemp3.pipeInterface import PipeInterface
 import re
 from attemp3.spiders.motherSpider import BaseSpider
 from attemp3.items import WebDownloadedElement
+import hashlib
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
@@ -81,12 +82,17 @@ class PipeDownload(PipeInterface):
         fName = self.myFileName(urlCleaned, contentType)
         fPN = self.getFullNamePath(urlCleaned, contentType, tabR["cod_reg"], doms)
 
-        allowedContentType = settings["allowedContentType"]
-        if len(allowedContentType) != 0:
-            extension = fName[-6:]
-            self.log(extension + f" -> {any(aCT in extension for aCT in allowedContentType)} <---------------------")
-            if not any(aCT in extension for aCT in allowedContentType):
+        allowedExtensions = settings["allowedContentType"]
+        if len(allowedExtensions) != 0:
+            _, fileExtension = os.path.splitext(fName)
+            fileExtension = fileExtension[1:].lower()  # Remove the dot and convert to lower case
+
+            if fileExtension not in allowedExtensions:
                 return self.skipElementForContentType(item)
+            # extension = fName[-6:]
+            # self.log(extension + f" -> {any(aCT in extension for aCT in allowedContentType)} <---------------------")
+            # if not any(aCT in extension for aCT in allowedContentType):
+            #     return self.skipElementForContentType(item)
 
         # desideredContentType = [None, ]
 
@@ -135,15 +141,15 @@ class PipeDownload(PipeInterface):
         return fileName 
     
     def myFilePath(self, url, idR, toPreserve=[]):
-        tmp = os.path.join(self.target_directory,idR)
+        tmp = os.path.join(self.target_directory, idR)
         upperbound = 10
         for x in url.split("/"):
             if not x in toPreserve and len(x) > upperbound:
                 if x in self.mapperLongString.keys():
                     x = self.mapperLongString[x]
                 else:
-                    hv = hash(x)
-                    toMod = -1 * hv if hv < 0 else hv
+                    hv = hashlib.sha256(x.encode('utf-8')).hexdigest()
+                    toMod = hv # -1 * hv if hv < 0 else hv
                     mod = (str(toMod)*5)[:upperbound]
                     self.log("WOW, ha oltrepassato il limite!" + x + " -> " + mod)
                     self.mapperLongString[x] = mod

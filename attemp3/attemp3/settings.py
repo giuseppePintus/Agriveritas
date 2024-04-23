@@ -67,7 +67,7 @@ ITEM_PIPELINES = {
    # "attemp3.pipelines.Attemp3Pipeline": 300,
     "attemp3.pipeJinaRequest.JinaRequest": 201,
     "attemp3.pipeJPParser.JPParser": 202,
-    "attemp3.pipeJPParser2.JPParser2": 203,
+    # "attemp3.pipeJPParser2.JPParser2": 203,
     "attemp3.pipeCsvResults.CsvPipeline" : 900,
     "attemp3.pipeJsonResults.JsonPipeline" : 901,
 }

@@ -6,11 +6,6 @@ from attemp3.pipeInterface import PipeInterface
 import re
 from attemp3.items import WebDownloadedElement
 
-import http.client
-import json
-
-import requests
-
 import os
 import re
 from html.parser import HTMLParser
@@ -79,56 +74,113 @@ class JPParser(PipeInterface):
             f.write(text_content)
 
 
-
-
-import os
 import re
 from html.parser import HTMLParser
-
 class HTMLToTextConverter(HTMLParser):
     def __init__(self):
         super().__init__()
         self.text = ""
-        self.in_pre = False
-        self.in_code = False
-        self.in_heading = False
-        self.heading_level = 0
+        self.current_indent = 0
+        self.elements_to_parse = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "a"]
+        self.inner_text = ""
+        self.inner_attrs = []
 
     def handle_starttag(self, tag, attrs):
-        if tag == "pre":
-            self.in_pre = True
-        elif tag == "code":
-            self.in_code = True
-        elif tag in ["h1", "h2", "h3", "h4", "h5", "h6"]:
-            self.in_heading = True
-            self.heading_level = int(tag[1])
+        if tag == "br":
+            self.text += "\n"
+        elif tag in self.elements_to_parse:
+            self.parse_element(tag, attrs=attrs)
+            self.parse_inner_text(tag, attrs)
+            
+    def parse_element(self, tag, attrs):
+        indent = "  " * self.current_indent
+        if tag == "h1":
+            self.text += f"{indent}# {self.get_text()}\n\n"
+        elif tag in ["h2", "h3", "h4", "h5", "h6"]:
+            level = {"h2": 2, "h3": 3, "h4": 4, "h5": 5, "h6": 6}[tag]
+            self.text += f"{indent}#" * level + " " + self.get_text() + "\n\n"
+        elif tag == "p":
+            self.text += f"{indent}{self.get_text()}\n\n"
+        elif tag == "a":
+            for attr in attrs:
+                if attr[0] == "href":
+                    self.text += f"[{self.get_inner_text()}]({attr[1]})\n"
+                    self.inner_text = ""  # Reset inner_text for the next occurrence
+                    break
+            else:
+                self.text += f"{self.get_text()}\n"
+
+    def parse_inner_text(self, tag, attrs):
+        if tag == "a":
+            self.inner_text = ""
+            self.inner_attrs = attrs
+        elif tag == "span":
+            if any("class" in a and "innerText" in a for a in self.inner_attrs):
+                self.inner_text += self.get_data()  # Get the current data in the parser
+
+    def get_inner_text(self):
+        return self.inner_text
+
+    def get_text(self):
+        text = super().get_starttag_text()
+        return text.strip()
 
     def handle_endtag(self, tag):
-        if tag == "pre":
-            self.in_pre = False
-        elif tag == "code":
-            self.in_code = False
-        elif tag in ["h1", "h2", "h3", "h4", "h5", "h6"]:
-            self.in_heading = False
+        if tag == "li":
+            self.text += "\n"
+        elif tag in self.elements_to_parse:
+            self.current_indent -= 1
 
     def handle_data(self, data):
-        if self.in_pre or self.in_code:
-            self.text += data
-        else:
-            self.text += re.sub(r"\s+", " ", data).strip()
-            if self.in_heading:
-                self.text += "\n" + "#" * self.heading_level + " "
+        if data.strip():
+            self.text += data.strip() + " "# import os
+# import re
+# from html.parser import HTMLParser
 
-    def handle_entityref(self, name):
-        if name == "nbsp":
-            self.text += " "
-        else:
-            self.text += f"&{name};"
+# class HTMLToTextConverter(HTMLParser):
+#     def __init__(self):
+#         super().__init__()
+#         self.text = ""
+#         self.in_pre = False
+#         self.in_code = False
+#         self.in_heading = False
+#         self.heading_level = 0
 
-    def handle_charref(self, name):
-        if name.startswith("x"):
-            self.text += chr(int(name[1:], 16))
-        else:
-            self.text += chr(int(name))
+#     def handle_starttag(self, tag, attrs):
+#         if tag == "pre":
+#             self.in_pre = True
+#         elif tag == "code":
+#             self.in_code = True
+#         elif tag in ["h1", "h2", "h3", "h4", "h5", "h6"]:
+#             self.in_heading = True
+#             self.heading_level = int(tag[1])
+
+#     def handle_endtag(self, tag):
+#         if tag == "pre":
+#             self.in_pre = False
+#         elif tag == "code":
+#             self.in_code = False
+#         elif tag in ["h1", "h2", "h3", "h4", "h5", "h6"]:
+#             self.in_heading = False
+
+#     def handle_data(self, data):
+#         if self.in_pre or self.in_code:
+#             self.text += data
+#         else:
+#             self.text += re.sub(r"\s+", " ", data).strip()
+#             if self.in_heading:
+#                 self.text += "\n" + "#" * self.heading_level + " "
+
+#     def handle_entityref(self, name):
+#         if name == "nbsp":
+#             self.text += " "
+#         else:
+#             self.text += f"&{name};"
+
+#     def handle_charref(self, name):
+#         if name.startswith("x"):
+#             self.text += chr(int(name[1:], 16))
+#         else:
+#             self.text += chr(int(name))
 
     
