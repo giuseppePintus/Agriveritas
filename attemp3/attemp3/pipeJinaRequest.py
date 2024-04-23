@@ -68,3 +68,78 @@ class JinaRequest(PipeInterface):
             self.log(f"Request failed with status code {response.status_code}")
 
         return res
+    
+
+
+
+
+
+
+#DA PROVARE
+# import re
+# from html.parser import HTMLParser
+
+# class HTMLToTextConverter(HTMLParser):
+#     def __init__(self):
+#         super().__init__()
+#         self.text = ""
+#         self.current_element = None
+#         self.current_level = 0
+#         self.elements_to_parse = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "a"]
+#         self.links = {}
+#         self.current_link = None
+
+#     def handle_starttag(self, tag, attrs):
+#         self.current_level = len(attrs)
+#         self.current_element = tag
+
+#     def handle_endtag(self, tag):
+#         if tag in self.elements_to_parse:
+#             self.current_level -= len(self.parse_attrs(tag))
+
+#     def handle_data(self, data):
+#         if self.current_level == 0 or self.current_element not in self.elements_to_parse:
+#             return
+
+#         if self.current_element == "a":
+#             href = self.get_attr("href", self.parse_attrs(self.current_element))
+#             self.links[self.get_text()] = href
+#         else:
+#             self.text += data.strip() + "\n"
+
+#     def handle_entityref(self, name):
+#         if name == "nbsp":
+#             self.text += " "
+#         else:
+#             self.text += f"&{name};"
+
+#     def handle_charref(self, name):
+#         if name.startswith("x"):
+#             self.text += chr(int(name[1:], 16))
+#         else:
+#             self.text += chr(int(name))
+
+#     def parse_attrs(self, tag):
+#         attrs = {}
+#         for attr in self.parse_entities(self.get_starttag_text()):
+#             key, value = attr.split("=")
+#             attrs[key] = value
+#         return attrs
+
+#     def parse_entities(self, data):
+#         return re.split(r'([^=]+)=([^>]+)', data)
+
+#     def get_text(self):
+#         text = super().get_starttag_text()
+#         return text.strip()
+
+#     def get_link(self):
+#         return self.current_link
+
+# if __name__ == "__main__":
+#     converter = HTMLToTextConverter()
+#     html = """
+#     <!-- Your provided HTML content here -->
+#     """
+#     converter.feed(html)
+#     print(converter.text)

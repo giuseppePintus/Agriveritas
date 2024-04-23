@@ -133,54 +133,6 @@ class HTMLToTextConverter(HTMLParser):
 
     def handle_data(self, data):
         if data.strip():
-            self.text += data.strip() + " "# import os
-# import re
-# from html.parser import HTMLParser
-
-# class HTMLToTextConverter(HTMLParser):
-#     def __init__(self):
-#         super().__init__()
-#         self.text = ""
-#         self.in_pre = False
-#         self.in_code = False
-#         self.in_heading = False
-#         self.heading_level = 0
-
-#     def handle_starttag(self, tag, attrs):
-#         if tag == "pre":
-#             self.in_pre = True
-#         elif tag == "code":
-#             self.in_code = True
-#         elif tag in ["h1", "h2", "h3", "h4", "h5", "h6"]:
-#             self.in_heading = True
-#             self.heading_level = int(tag[1])
-
-#     def handle_endtag(self, tag):
-#         if tag == "pre":
-#             self.in_pre = False
-#         elif tag == "code":
-#             self.in_code = False
-#         elif tag in ["h1", "h2", "h3", "h4", "h5", "h6"]:
-#             self.in_heading = False
-
-#     def handle_data(self, data):
-#         if self.in_pre or self.in_code:
-#             self.text += data
-#         else:
-#             self.text += re.sub(r"\s+", " ", data).strip()
-#             if self.in_heading:
-#                 self.text += "\n" + "#" * self.heading_level + " "
-
-#     def handle_entityref(self, name):
-#         if name == "nbsp":
-#             self.text += " "
-#         else:
-#             self.text += f"&{name};"
-
-#     def handle_charref(self, name):
-#         if name.startswith("x"):
-#             self.text += chr(int(name[1:], 16))
-#         else:
-#             self.text += chr(int(name))
-
-    
+            self.text += data.strip() + " "
+            
+            

@@ -82,23 +82,15 @@ class PipeDownload(PipeInterface):
         fName = self.myFileName(urlCleaned, contentType)
         fPN = self.getFullNamePath(urlCleaned, contentType, tabR["cod_reg"], doms)
 
+        
         allowedExtensions = settings["allowedContentType"]
         if len(allowedExtensions) != 0:
             _, fileExtension = os.path.splitext(fName)
             fileExtension = fileExtension[1:].lower()  # Remove the dot and convert to lower case
 
-            if fileExtension not in allowedExtensions:
-                return self.skipElementForContentType(item)
-            # extension = fName[-6:]
-            # self.log(extension + f" -> {any(aCT in extension for aCT in allowedContentType)} <---------------------")
-            # if not any(aCT in extension for aCT in allowedContentType):
-            #     return self.skipElementForContentType(item)
-
-        # desideredContentType = [None, ]
-
-        # if contentType is None:
-        #     contentType = "html"
-
+        #     if fileExtension not in allowedExtensions:
+        #         return self.skipElementForContentType(item)
+            
 
         self.log("######### " + fPN)
         if not os.path.exists(fPath):
@@ -115,7 +107,7 @@ class PipeDownload(PipeInterface):
     
     def skipElementForContentType(self, item : WebDownloadedElement):
         item.settingPart["aborted"] = True
-        item.settingPart["abortReason"] = "This element is not a type into " + item.settingPart["allowedContentType"]
+        item.settingPart["abortReason"] = "This element is not a type into " + ", ".join(item.settingPart["allowedContentType"]) if item.settingPart["allowedContentType"] else ""
         return item
     
     def behaviour_skipped(self, item : WebDownloadedElement, spider):
