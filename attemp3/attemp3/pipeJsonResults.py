@@ -15,6 +15,15 @@ class JsonPipeline(PipeInterface):
         self.file = open(self.jsonFileName, 'w')
 
     def process_item(self, item, spider):
+        self.save_item_status(item)
+        return item
+    
+    def behaviour_skipped(self, item : WebDownloadedElement, spider):
+        #self.log("So no JSON element created")
+        self.save_item_status(item)
+
+
+    def save_item_status(self, item):
         if isinstance(item, WebDownloadedElement):
             row = {
                 'IDuni': item.tableRow['IDuni'],
@@ -32,10 +41,6 @@ class JsonPipeline(PipeInterface):
             }
             json.dump(row, self.file, indent=4)
             self.file.write('\n')  # add a newline between each JSON object
-        return item
-    
-    def behaviour_skipped(self, item : WebDownloadedElement, spider):
-        self.log("So no JSON element created")
 
     def close_spider(self, spider):
         try:

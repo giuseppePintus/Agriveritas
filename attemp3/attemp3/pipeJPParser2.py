@@ -80,7 +80,7 @@ class JPParser2(PipeInterface):
 
 
 
-    def html_to_txt(html_file):
+    def html_to_txt(self, html_file):
         with open(html_file, 'r') as f:
             html_content = f.read()
 

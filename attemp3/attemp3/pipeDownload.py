@@ -84,6 +84,7 @@ class PipeDownload(PipeInterface):
         allowedContentType = settings["allowedContentType"]
         if len(allowedContentType) != 0:
             extension = fName[-6:]
+            self.log(extension + f" -> {any(aCT in extension for aCT in allowedContentType)} <---------------------")
             if not any(aCT in extension for aCT in allowedContentType):
                 return self.skipElementForContentType(item)
 

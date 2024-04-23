@@ -31,6 +31,16 @@ class CsvPipeline(PipeInterface):
         self.file.close()
 
     def process_item(self, item, spider):
+        self.save_item_status(item)
+        return item
+    
+
+    def behaviour_skipped(self, item : WebDownloadedElement, spider):
+        #self.log("So no CVS row created")
+        self.save_item_status(item)
+
+
+    def save_item_status(self, item):
         if isinstance(item, WebDownloadedElement):
             row = {
                 'IDuni': item.tableRow['IDuni'],
@@ -47,9 +57,4 @@ class CsvPipeline(PipeInterface):
                 'allowedContentType': item.settingPart['allowedContentType'],
             }
             self.exporter.writerow(row)
-        return item
-    
-
-    def behaviour_skipped(self, item : WebDownloadedElement, spider):
-        self.log("So no CVS row created")
     
