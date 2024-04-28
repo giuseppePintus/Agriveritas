@@ -70,6 +70,7 @@ ITEM_PIPELINES = {
     # "attemp3.pipeJPParser2.JPParser2": 203,
     "attemp3.pipeCsvResults.CsvPipeline" : 900,
     "attemp3.pipeJsonResults.JsonPipeline" : 901,
+    "attemp3.pipeMilvus.PipMilvus": 945
 }
 
 FILES_STORE = "download"
