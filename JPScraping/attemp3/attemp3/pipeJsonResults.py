@@ -14,6 +14,10 @@ class JsonPipeline(PipeInterface):
         self.jsonFileName += f"_{time.strftime('%m_%d_%H_%M', time.gmtime(a))}_{spider.code_region}.json"
         self.file = open(self.jsonFileName, 'w')
 
+
+    def close_spider(self, spider):
+        super().close_spider(spider)
+
     def process_item(self, item, spider):
         self.save_item_status(item)
         return item
