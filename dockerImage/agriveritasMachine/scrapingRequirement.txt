@@ -1,0 +1,12 @@
+scrapy
+beautifulsoup4
+pymilvus
+langchain
+openai
+tiktoken
+
+pypdf
+
+
+pymilvus[model]
+FlagEmbedding
