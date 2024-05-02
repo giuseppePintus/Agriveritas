@@ -17,9 +17,10 @@ class CsvPipeline(PipeInterface):
         
         self.file = open(self.csvFileName, 'w', newline='')
         self.exporter = csv.DictWriter(self.file, fieldnames=[
-            'IDuni', 'cod_reg', 'url_from', 'HTTPStatus', 'hash_code',
-            'file_downloaded_name', 'file_downloaded_dir', 'timestamp_download',
-            'timestamp_mod_author', 'aborted', 'abortReason', 'allowedContentType'
+            'ID_univoco', 'cod_reg', 'ID_counter', 'url_from', 'HTTP_status', 'hash_code',
+            'file_downloaded_name', 'file_downloaded_dir', 'timestamp_download', 'timestamp_mod_author',
+            'is_training',
+            'aborted', 'abortReason', 'allowedContentType'
         ])
         self.exporter.writeheader()  # <--- Print the header
         
@@ -43,15 +44,20 @@ class CsvPipeline(PipeInterface):
     def save_item_status(self, item):
         if isinstance(item, WebDownloadedElement):
             row = {
-                'IDuni': item.tableRow['IDuni'],
+                'ID_univoco': item.tableRow['ID_univoco'],
                 'cod_reg': item.tableRow['cod_reg'],
+                'ID_counter': item.tableRow['ID_counter'],
                 'url_from': item.tableRow['url_from'],
-                'HTTPStatus': item.tableRow['HTTPStatus'],
+                'HTTP_status': item.tableRow['HTTP_status'],
                 'hash_code': item.tableRow['hash_code'],
+
                 'file_downloaded_name': item.tableRow['file_downloaded_name'],
                 'file_downloaded_dir': item.tableRow['file_downloaded_dir'],
                 'timestamp_download': item.tableRow['timestamp_download'],
                 'timestamp_mod_author': item.tableRow['timestamp_mod_author'],
+
+                'is_training': item.tableRow['is_training'],
+               
                 'aborted': item.settingPart['aborted'],
                 'abortReason': item.settingPart['abortReason'],
                 'allowedContentType': item.settingPart['allowedContentType'],

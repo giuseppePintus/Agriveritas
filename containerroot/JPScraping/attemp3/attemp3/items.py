@@ -7,18 +7,21 @@ import scrapy
 
 
 class TableRowInfos(scrapy.Item):
-    IDuni = scrapy.Field()
+    ID_univoco = scrapy.Field()
     cod_reg = scrapy.Field()
+    ID_counter = scrapy.Field()
     url_from = scrapy.Field()
-    HTTPStatus = scrapy.Field()
+    HTTP_status = scrapy.Field()
     hash_code = scrapy.Field()
     
     file_downloaded_name = scrapy.Field()
     file_downloaded_dir = scrapy.Field()
     timestamp_download = scrapy.Field()
     timestamp_mod_author = scrapy.Field()
-    
 
+    embed_risorsa = scrapy.Field()
+    is_training = scrapy.Field()
+    
 class SettingsElement(scrapy.Item):
     aborted = scrapy.Field()
     abortReason = scrapy.Field()

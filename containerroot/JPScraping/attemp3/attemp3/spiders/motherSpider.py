@@ -65,24 +65,41 @@ class BaseSpider(Spider):
             if parsed_url.netloc in self.allowed_domains:
                 yield Request(absolute_url, callback=self.parse)
 
-
-
     def create_item(self, response : Response, hash_code):
         item = WebDownloadedElement()
 
         item["response"] = response
 
-        item.tableRow["IDuni"] = self.counter
+        item.tableRow["ID_counter"] = str(self.counter)
+        
         self.counter = self.counter + 1
         
         #cod_reg -> ci pensa complete
         item.tableRow["url_from"] = str(response.url)
-        item.tableRow["HTTPStatus"] = response.status
+        item.tableRow["HTTP_status"] = response.status
         item.tableRow["hash_code"] = hash_code
         # item.tableRow.file_downloaded_name = scrapy.Field()
         # item.tableRow.file_downloaded_dir = scrapy.Field()
         item.tableRow["timestamp_download"] = time.time()
         # item.tableRow.timestamp_mod_author = scrapy.Field()
+        #embed_risorsa = scrapy.Field()
+        item.tableRow["is_training"] = False if "faq" in str(response.url) else True
+
+        ### qui ### ID_univoco = scrapy.Field()
+        ### ragnoFiglio ### cod_reg = scrapy.Field()
+        ### qui ### ID_counter = scrapy.Field()
+        ### qui ### url_from = scrapy.Field()
+        ### qui ### HTTP_status = scrapy.Field()
+        ### qui ### hash_code = scrapy.Field()
+        
+        ### downloadPipe ### file_downloaded_name = scrapy.Field()
+        ### downloadPipe ### file_downloaded_dir = scrapy.Field()
+        ### qui ### timestamp_download = scrapy.Field()
+        ### downloadPipe ###timestamp_mod_author = scrapy.Field()
+
+        ### milvusPipe ###embed_risorsa = scrapy.Field()
+        ### qui ### is_training = scrapy.Field()
+    
 
         #item.settingPart
         # aborted = scrapy.Field()
@@ -90,6 +107,10 @@ class BaseSpider(Spider):
         item.settingPart["allowedContentType"] = ["html", "pdf"] # scrapy.Field()
 
         self.complete_inizialization(item)
+        item.tableRow["ID_univoco"] = f"{item.tableRow['cod_reg']}_{item.tableRow['ID_counter']}"
+
+
+
         return item
         # return {
         #     "IDres": hash_code,

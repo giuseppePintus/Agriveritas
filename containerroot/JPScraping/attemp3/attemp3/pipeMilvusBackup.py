@@ -16,10 +16,9 @@ from itemadapter import ItemAdapter
 
 from pymilvus import connections, Collection, utility, FieldSchema, DataType, CollectionSchema
 
-from langchain_community.document_loaders import PyPDFLoader
+from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pymilvus.model.hybrid import BGEM3EmbeddingFunction
-# from langchain_community.document_loaders
 
 import docker
 
@@ -35,11 +34,12 @@ class PipeMilvus(PipeInterface):
     risorsa_collection : Collection
     chunk_collection : Collection
 
-    bge_m3_ef = BGEM3EmbeddingFunction(
-            model_name='BAAI/bge-m3',
-            device='cuda',
-            use_fp16=True
-        )
+    bge_m3_ef = None
+    # BGEM3EmbeddingFunction(
+    #         model_name='BAAI/bge-m3',
+    #         device='cuda',
+    #         use_fp16=True
+    #     )
 
     def generateRandomEmbedding(self, amount):
         v = [[random.uniform(0.0, 1.0)] * amount]
@@ -50,20 +50,20 @@ class PipeMilvus(PipeInterface):
     def create_collection_resource(self):
         risorsa_schema = CollectionSchema(
             fields=[
-                FieldSchema(name="ID_univoco", dtype=DataType.VARCHAR, max_length=12, is_primary=True),
+                FieldSchema(name="ID_univoco", dtype=DataType.VARCHAR,  max_length=12, is_primary=True),
                 FieldSchema(name="cod_regione", dtype=DataType.VARCHAR, max_length=2),
-                FieldSchema(name="ID_counter", dtype=DataType.VARCHAR, max_length=10),
-
-                FieldSchema(name="url", dtype=DataType.VARCHAR, max_length=1000),
+                FieldSchema(name="ID_counter", dtype=DataType.VARCHAR,  max_length=10),
+                FieldSchema(name="url_from", dtype=DataType.VARCHAR, max_length=1000),
                 FieldSchema(name="HTTP_status", dtype=DataType.INT16),
                 FieldSchema(name="hash_code", dtype=DataType.VARCHAR, max_length=64),
-                FieldSchema(name="file_name", dtype=DataType.VARCHAR, max_length=100),
-                FieldSchema(name="file_dir", dtype=DataType.VARCHAR, max_length=300),
+                FieldSchema(name="file_downloaded_name", dtype=DataType.VARCHAR, max_length=100),
+                FieldSchema(name="file_downloaded_dir", dtype=DataType.VARCHAR, max_length=300),
+
                 FieldSchema(name="timestamp_download", dtype=DataType.INT64),
                 FieldSchema(name="timestamp_mod_author", dtype=DataType.INT64),
                 
-                FieldSchema(name="embed_risorsa", dtype=DataType.FLOAT_VECTOR, dim=1024),
-                FieldSchema(name="isTraining", dtype=DataType.BOOL)
+                FieldSchema(name="embed_risorsa", dtype=DataType.FLOAT_VECTOR, dim=1024),  # Add a vector field
+                FieldSchema(name="is_training", dtype=DataType.BOOL)  # Add a vector field
             ],
             description="RISORSA collection"
         )
@@ -71,22 +71,16 @@ class PipeMilvus(PipeInterface):
         # Create the RISORSA collection
         risorsa_collection = Collection(name="RISORSA", schema=risorsa_schema)
 
-        # Create an index on the primary key field "ID_univoco"
+        # Create an index on the primary key field "ID_univoco" for the RISORSA collection
         risorsa_collection.create_index(
             field_name="ID_univoco",
-            index_params={"index_type": "Trie"}
+            index_params={"index_type": "STL_SORT"}
         )
 
-        # Create an index on the vector field "embed_risorsa"
+        # Create an index on the vector field "vector" for the RISORSA collection
         risorsa_collection.create_index(
-            field_name="embed_risorsa",
+            field_name="vector",
             index_params={"index_type": "FLAT", "metric_type": "L2"}
-        )
-
-        # Create an index on the "cod_regione" field
-        risorsa_collection.create_index(
-            field_name="cod_regione",
-            index_params={"index_type": "Trie"}
         )
 
         return risorsa_collection
@@ -102,22 +96,34 @@ class PipeMilvus(PipeInterface):
             ],
             description="CHUNK collection"
         )
+        # chunk_schema = CollectionSchema(
+        #     fields=[
+        #         # FieldSchema(name="ID_univoco_risorsa", dtype=DataType.INT64, is_primary=True),
+        #         # FieldSchema(name="ID_chunk", dtype=DataType.INT64, is_primary=True),
+        #         # FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1024)
+        #         FieldSchema(name="ID", dtype=DataType.VARCHAR, max_length=255, is_primary=True),
+        #         FieldSchema(name="ID_univoco_risorsa", dtype=DataType.INT64),
+        #         FieldSchema(name="ID_chunk", dtype=DataType.INT64),
+        #         FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1024),
+        #         FieldSchema(name="relative_text", dtype=DataType.VARCHAR, max_length=1000, is_primary=True)
+        #     ],
+        #     description="CHUNK collection"
+        # )
 
         # Create the CHUNK collection
         chunk_collection = Collection(name="CHUNK", schema=chunk_schema)
 
-        # Create an index on the primary key field "ID_chunk"
+        # Create an index on the primary key field "ID" for the CHUNK collection
         chunk_collection.create_index(
-            field_name="ID_chunk",
+            field_name="ID",
             index_params={"index_type": "Trie"}
         )
 
-        # Create an index on the vector field "embedding"
+        # Create an index on the vector field "embedding" for the CHUNK collection
         chunk_collection.create_index(
             field_name="embedding",
-            index_params={"index_type": "IVF_FLAT", "metric_type": "L2", "params": {"nlist": 2048}}
+            index_params={"index_type": "FLAT", "metric_type": "L2"}
         )
-
         return chunk_collection
 
     def create_collections(self):
@@ -149,7 +155,7 @@ class PipeMilvus(PipeInterface):
 
     def process_item(self, item : WebDownloadedElement, spider):
         self.log("")
-        self.log(" ### INIZIO NUOVO FILE -> " + str(item.tableRow["ID_univoco"]))
+        self.log(" ### INIZIO NUOVO FILE -> " + str(item.tableRow["IDuni"]))
     
         resp = item['response']
         doms = item["domains"]
@@ -166,7 +172,7 @@ class PipeMilvus(PipeInterface):
                 self.log("Caricando un pdf!")
                 self.managePDF(tabR)
             else:
-                self.log(f"NON riesco a caricarlo! -> {tabR['file_downloaded_name']} / {tabR['url_from']}")
+                self.log("NON riesco a caricarlo!")
         self.log(aCapo=4)
         return item
     
@@ -177,8 +183,6 @@ class PipeMilvus(PipeInterface):
         txtContent = ""
         with open(filename, 'r', encoding="UTF-8") as file:
             txtContent = file.read()
-
-        tabR["embed_risorsa"] = self.bge_m3_ef.embed(txtContent)['dense']
 
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         texts = text_splitter.split_text(txtContent) #texts = text_splitter.split_documents([txtContent]) #documents
@@ -203,13 +207,6 @@ class PipeMilvus(PipeInterface):
         self.log(f"Number of pages in a new array: {len(pages)}")
         self.log(f"Content of 1st page: {pages[0]}")
 
-        all_text = ""
-        for page_text in pages:
-            all_text += page_text
-        
-
-        tabR["embed_risorsa"] = self.bge_m3_ef.embed(all_text)['dense']
-
         #splitting the text into
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         texts = text_splitter.split_documents(pages) #documents
@@ -227,6 +224,7 @@ class PipeMilvus(PipeInterface):
 
     def embedResult(self, tabR, arrayToEmbed):
         
+
         docs_embeddings = self.bge_m3_ef.encode_documents(arrayToEmbed)
         
         # self.log("Embeddings:", docs_embeddings)
@@ -250,37 +248,26 @@ class PipeMilvus(PipeInterface):
     def pushingResults(self, embeddings, tabR):
         self.log("\n @@@@@@ A @@@@@@ \n")
 
-        ### motherSpider ### ID_univoco = scrapy.Field()
-        ### ragnoFiglio ### cod_reg = scrapy.Field()
-        ### motherSpider ### ID_counter = scrapy.Field()
-        ### motherSpider ### url_from = scrapy.Field()
-        ### motherSpider ### HTTP_status = scrapy.Field()
-        ### motherSpider ### hash_code = scrapy.Field()
+        # IDuni = scrapy.Field()
+        # cod_reg = scrapy.Field()
+        # url_from = scrapy.Field()
+        # HTTPStatus = scrapy.Field()
+        # hash_code = scrapy.Field()
         
-        ### downloadPipe ### file_downloaded_name = scrapy.Field()
-        ### downloadPipe ### file_downloaded_dir = scrapy.Field()
-        ### motherSpider ### timestamp_download = scrapy.Field()
-        ### downloadPipe ###timestamp_mod_author = scrapy.Field()
-
-        ### qui ###embed_risorsa = scrapy.Field()
-        ### motherSpider ### is_training = scrapy.Field()
+        # file_downloaded_name = scrapy.Field()
+        # file_downloaded_dir = scrapy.Field()
+        # timestamp_download = scrapy.Field()
+        # timestamp_mod_author = scrapy.Field()
         
-        ID_univoco = tabR["ID_univoco"]
+        idRes = tabR["IDuni"]
         cod_regione = tabR["cod_reg"]
-        ID_counter = tabR["ID_counter"]
-        url_from = tabR["url_from"]
-        HTTP_status = tabR["HTTP_status"]
+        url = tabR["url_from"]
+        httpStatus = tabR["HTTPStatus"]
         hashCode = tabR["hash_code"]
-
         myFilename = tabR["file_downloaded_name"]
         myPath = tabR["file_downloaded_dir"]
         timestamp_download = int(tabR["timestamp_download"])
         timestamp_mod_author = tabR["timestamp_mod_author"]
-
-        embed_risorsa = tabR["embed_risorsa"]
-        is_training = tabR["is_training"]
-
-
         if (type(timestamp_mod_author) != type(int)):
             timestamp_mod_author = 0
         else:
@@ -291,20 +278,15 @@ class PipeMilvus(PipeInterface):
         
 
         self.log("\n @@@@@@ B @@@@@@ \n")
-        self.log(f"""\n ${ID_univoco} - {type(ID_univoco)}
+        self.log(f"""\n ${idRes} - {type(idRes)}
                     \n ${cod_regione} - {type(cod_regione)}
-                    \n ${ID_counter} - {type(ID_counter)}
-                    \n ${url_from} - {type(url_from)}
-                    \n${HTTP_status} - {type(HTTP_status)}
+                    \n ${url} - {type(url)}
+                    \n${httpStatus} - {type(httpStatus)}
                     \n${hashCode} - {type(hashCode)}
-
                     \n${myFilename} - {type(myFilename)}
                     \n${myPath} - {type(myPath)}
                     \n${timestamp_download} - {type(timestamp_download)}
-                    \n${timestamp_mod_author} - {type(timestamp_mod_author)}
-
-                    \n${str(embed_risorsa)} - {type(embed_risorsa)}
-                    \n${is_training} - {type(is_training)}""")
+                    \n${timestamp_mod_author} - {type(timestamp_mod_author)}""")
 
 
         self.log("\n @@@@@@ C @@@@@@ \n")
@@ -314,36 +296,26 @@ class PipeMilvus(PipeInterface):
         amountChunck = len(embeddings["dense"]) #5
         for i in range(0,amountPage):
             dataR = [{
-                "ID_univoco": ID_univoco,
+                "ID_univoco": idRes,
                 "cod_regione": cod_regione,
-                "ID_counter": ID_counter,
-                "url_from": url_from,
-                "HTTP_status" : HTTP_status,
+                "url": url,
+                "HTTP_status" : httpStatus,
                 "hash_code" : hashCode,
-
                 "file_name" : myFilename,
                 "file_dir" : myPath,
                 # FieldSchema(name="original_content", dtype=DataType.BINARY, max_length=1),
                 # FieldSchema(name="parsed_content", dtype=DataType.BINARY, max_length=1),
                 "timestamp_download" : timestamp_download,
                 "timestamp_mod_author" : timestamp_mod_author,
-                
-                "embed_risorsa" : embed_risorsa,
-                "is_training" : is_training
+                "vector" : self.generateRandomEmbedding(128) # [1.0 * 128.0]  # Add a vector field
             }]
             self.risorsa_collection.insert(dataR)
             for j in range(0, amountChunck):
                 dataC = [{
-                    "ID_chunk" : f"{ID_univoco}_{j}",
-                    "ID_univoco_risorsa" : ID_univoco,
-                    "ID_counter" : j,
-                    "embedding" : embeddings["dense"][j], #generateRandomEmbedding(1024)#
-                    "relative_text" : embeddings["lyrics"][j] 
-                    # FieldSchema(name="ID_chunk", dtype=DataType.VARCHAR, max_length=22, is_primary=True),
-                    # FieldSchema(name="ID_univoco_risorsa", dtype=DataType.VARCHAR,  max_length=12),
-                    # FieldSchema(name="ID_counter", dtype=DataType.VARCHAR, max_length=10),
-                    # FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1024),
-                    # FieldSchema(name="relative_text", dtype=DataType.VARCHAR, max_length=1000)
+                    "ID" : self.concat_int_fields(idRes,j),
+                    "ID_univoco_risorsa" : idRes,
+                    "ID_chunk" : j,
+                    "embedding" : embeddings["dense"][j] #generateRandomEmbedding(1024)#
                 }]
                 self.chunk_collection.insert(dataC)
 

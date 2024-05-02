@@ -83,24 +83,40 @@ class PipeDownload(PipeInterface):
         fPN = self.getFullNamePath(urlCleaned, contentType, tabR["cod_reg"], doms)
 
         
-        allowedExtensions = settings["allowedContentType"]
-        if len(allowedExtensions) != 0:
-            _, fileExtension = os.path.splitext(fName)
-            fileExtension = fileExtension[1:].lower()  # Remove the dot and convert to lower case
+        # allowedExtensions = settings["allowedContentType"]
+        # if len(allowedExtensions) != 0:
+        #     _, fileExtension = os.path.splitext(fName)
+        #     fileExtension = fileExtension[1:].lower()  # Remove the dot and convert to lower case
 
         #     if fileExtension not in allowedExtensions:
         #         return self.skipElementForContentType(item)
             
 
-        self.log("######### " + fPN)
+        self.log("## path + nome :  " + fPN + "  #######")
         if not os.path.exists(fPath):
             os.makedirs(fPath)
         
-        # if any(desired_type in contentType for desired_type in desideredContentType):
-        #     if re
+
         Path(fPN).write_bytes(resp.body)
         tabR["file_downloaded_name"] = fName
         tabR["file_downloaded_dir"] = fPath
+
+
+        ### motherSpider ### ID_univoco = scrapy.Field()
+        ### ragnoFiglio ### cod_reg = scrapy.Field()
+        ### motherSpider ### ID_counter = scrapy.Field()
+        ### motherSpider ### url_from = scrapy.Field()
+        ### motherSpider ### HTTP_status = scrapy.Field()
+        ### motherSpider ### hash_code = scrapy.Field()
+        
+        ### qui ### file_downloaded_name = scrapy.Field()
+        ### qui ### file_downloaded_dir = scrapy.Field()
+        ### motherSpider ### timestamp_download = scrapy.Field()
+        ### qui ###timestamp_mod_author = scrapy.Field()
+
+        ### milvusPipe ### embed_risorsa = scrapy.Field()
+        ### motherSpider ### is_training = scrapy.Field()
+    
         
         self.log(aCapo=7)
         return item
@@ -113,7 +129,6 @@ class PipeDownload(PipeInterface):
     def behaviour_skipped(self, item : WebDownloadedElement, spider):
         self.log("Skipped element")
 
-
     def myFileName(self, url, contentType):
         fileName = url.split("/")[-1]
         # Replace invalid characters with "_"
@@ -125,6 +140,8 @@ class PipeDownload(PipeInterface):
         
         if "html" in contentType and not "html" in fileName:
             fileName += "." + "html"
+        elif "pdf" in contentType and not "pdf" in fileName:
+            fileName += "." + "pdf"
         
         tollerance = 40
         if len(fileName) > tollerance:
@@ -149,7 +166,7 @@ class PipeDownload(PipeInterface):
                     
             tmp = os.path.join(tmp,x)
         
-        self.log("%%%%%%%%%%%%%%%%%%%%%%%")
+        self.log(f"% url {str(url)} trasformato in path: %%%%%%%%%%%%%%%%%%%%%%")
         self.log(str(url) + "  " + tmp)
         self.log("%%%%%%%%%%%%%%%%%%%%%%%")
 

@@ -8,6 +8,9 @@ const queryInput = document.getElementById("user-input")
 const IA_class = "userA"
 const Uman_class = "userQ"
 
+
+console.log("à -> " + getBasicURL())
+
 sendBut.addEventListener("click", () => {
     invokeQueryAnswer()
 })
@@ -78,8 +81,6 @@ function appendMessage(text, user, where) {
     where.appendChild(newMessagge)
 }
 
-
-
 queryInput.addEventListener("keydown", (event) => {
     if ((event.key === "Enter" || event.keyCode === 13) && event.shiftKey) {
       event.preventDefault(); // prevent new line insertion
@@ -94,15 +95,14 @@ queryInput.addEventListener("keydown", (event) => {
     }
   });
 
-
-
-
-ip="http://127.0.0.1"
-port="5000"
-query="IAresponse"
-
+function getBasicURL() {
+    ip="http://137.204.107.40"
+    port="37336"
+    return ip + ":" + port
+}
 
 function computeReponse(queryText){
+    query="IAresponse"
     // Create an XMLHttpRequest object
     const xhttp = new XMLHttpRequest();
 
@@ -118,7 +118,7 @@ function computeReponse(queryText){
         }
         
     }
-
+    console.log("-> " +ip)
     let urlTmp = ip+":"+port+"/"+query+"/"
     if (actRegCode != ""){
         urlTmp += actRegCode +"?qt="+queryText
@@ -202,7 +202,7 @@ refreshButtons()
 const lastUpdateDateSpan = document.getElementById("last-update-date")
 
 // Create an XMLHttpRequest object
-const xhttp = new XMLHttpRequest();
+const xhttp = new XMLHttpRequest()
 
 // Define a callback function
 xhttp.onload = function() {
@@ -212,6 +212,6 @@ xhttp.onload = function() {
 }
 
 // Send a request
-xhttp.open("GET", ip+":"+port+"/initInfo");
+xhttp.open("GET", getBasicURL() + "/initInfo");
 xhttp.send();
 // return "Sono ancora una piccola versione puramente di prototipazione, non riesco ancora a soddisfare alcuna richiesta. Torna presto per delle novità!"
