@@ -13,6 +13,7 @@ from itertools import chain
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 
+import numpy as np
 
 from pymilvus import connections, Collection, utility, FieldSchema, DataType, CollectionSchema
 
@@ -50,11 +51,11 @@ class PipeMilvus(PipeInterface):
     def create_collection_resource(self):
         risorsa_schema = CollectionSchema(
             fields=[
-                FieldSchema(name="ID_univoco", dtype=DataType.VARCHAR, max_length=12, is_primary=True),
-                FieldSchema(name="cod_regione", dtype=DataType.VARCHAR, max_length=2),
-                FieldSchema(name="ID_counter", dtype=DataType.VARCHAR, max_length=10),
+                FieldSchema(name="ID_univoco", dtype=DataType.VARCHAR, max_length=16, is_primary=True),
+                FieldSchema(name="cod_regione", dtype=DataType.VARCHAR, max_length=6),
+                FieldSchema(name="ID_counter", dtype=DataType.VARCHAR, max_length=9),
 
-                FieldSchema(name="url", dtype=DataType.VARCHAR, max_length=1000),
+                FieldSchema(name="url_from", dtype=DataType.VARCHAR, max_length=2000),
                 FieldSchema(name="HTTP_status", dtype=DataType.INT16),
                 FieldSchema(name="hash_code", dtype=DataType.VARCHAR, max_length=64),
                 FieldSchema(name="file_name", dtype=DataType.VARCHAR, max_length=100),
@@ -63,7 +64,7 @@ class PipeMilvus(PipeInterface):
                 FieldSchema(name="timestamp_mod_author", dtype=DataType.INT64),
                 
                 FieldSchema(name="embed_risorsa", dtype=DataType.FLOAT_VECTOR, dim=1024),
-                FieldSchema(name="isTraining", dtype=DataType.BOOL)
+                FieldSchema(name="is_training", dtype=DataType.BOOL)
             ],
             description="RISORSA collection"
         )
@@ -94,11 +95,11 @@ class PipeMilvus(PipeInterface):
     def create_collection_chunck(self):
         chunk_schema = CollectionSchema(
             fields=[
-                FieldSchema(name="ID_chunk", dtype=DataType.VARCHAR, max_length=22, is_primary=True),
-                FieldSchema(name="ID_univoco_risorsa", dtype=DataType.VARCHAR,  max_length=12),
+                FieldSchema(name="ID_chunck", dtype=DataType.VARCHAR, max_length=26, is_primary=True),
+                FieldSchema(name="ID_univoco_risorsa", dtype=DataType.VARCHAR,  max_length=16),
                 FieldSchema(name="ID_counter", dtype=DataType.VARCHAR, max_length=10),
                 FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1024),
-                FieldSchema(name="relative_text", dtype=DataType.VARCHAR, max_length=1000)
+                FieldSchema(name="relative_text", dtype=DataType.VARCHAR, max_length=1200) #un chuck era lungo 1005
             ],
             description="CHUNK collection"
         )
@@ -108,7 +109,7 @@ class PipeMilvus(PipeInterface):
 
         # Create an index on the primary key field "ID_chunk"
         chunk_collection.create_index(
-            field_name="ID_chunk",
+            field_name="ID_chunck",
             index_params={"index_type": "Trie"}
         )
 
@@ -178,7 +179,10 @@ class PipeMilvus(PipeInterface):
         with open(filename, 'r', encoding="UTF-8") as file:
             txtContent = file.read()
 
-        tabR["embed_risorsa"] = self.bge_m3_ef.embed(txtContent)['dense']
+        try:
+            tabR["embed_risorsa"] = self.bge_m3_ef.encode_documents([txtContent])['dense'][0]
+        except:
+            tabR["embed_risorsa"] = self.generateRandomEmbedding(1024)
 
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         texts = text_splitter.split_text(txtContent) #texts = text_splitter.split_documents([txtContent]) #documents
@@ -205,10 +209,14 @@ class PipeMilvus(PipeInterface):
 
         all_text = ""
         for page_text in pages:
-            all_text += page_text
+            all_text += page_text.page_content
         
+        try:
+            tabR["embed_risorsa"] = self.bge_m3_ef.encode_documents([all_text])['dense'][0]
+        except:
+            tabR["embed_risorsa"] = self.generateRandomEmbedding(1024)
 
-        tabR["embed_risorsa"] = self.bge_m3_ef.embed(all_text)['dense']
+
 
         #splitting the text into
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
@@ -241,13 +249,13 @@ class PipeMilvus(PipeInterface):
         # print(len(docs_embeddings["dense"]))
 
         self.log("\n\n\n\n\n\n\n\n\n\n\n\n")
-        self.pushingResults(docs_embeddings, tabR)
+        self.pushingResults(docs_embeddings, tabR, arrayToEmbed)
         # ####################################
 
-    def concat_int_fields(self, ID_univoco_risorsa, ID_chunk):
-        return f"{ID_univoco_risorsa}_{ID_chunk}"[:255]
+    def concat_int_fields(self, ID_univoco_risorsa, ID_chunck):
+        return f"{ID_univoco_risorsa}_{ID_chunck}"[:255]
 
-    def pushingResults(self, embeddings, tabR):
+    def pushingResults(self, embeddings, tabR, arrayToEmbed):
         self.log("\n @@@@@@ A @@@@@@ \n")
 
         ### motherSpider ### ID_univoco = scrapy.Field()
@@ -277,7 +285,7 @@ class PipeMilvus(PipeInterface):
         timestamp_download = int(tabR["timestamp_download"])
         timestamp_mod_author = tabR["timestamp_mod_author"]
 
-        embed_risorsa = tabR["embed_risorsa"]
+        embed_risorsa = [a for a in tabR["embed_risorsa"]]
         is_training = tabR["is_training"]
 
 
@@ -303,7 +311,7 @@ class PipeMilvus(PipeInterface):
                     \n${timestamp_download} - {type(timestamp_download)}
                     \n${timestamp_mod_author} - {type(timestamp_mod_author)}
 
-                    \n${str(embed_risorsa)} - {type(embed_risorsa)}
+                    \n${embed_risorsa} - {len(embed_risorsa)} - {type(embed_risorsa)}
                     \n${is_training} - {type(is_training)}""")
 
 
@@ -328,22 +336,41 @@ class PipeMilvus(PipeInterface):
                 "timestamp_download" : timestamp_download,
                 "timestamp_mod_author" : timestamp_mod_author,
                 
-                "embed_risorsa" : embed_risorsa,
+                "embed_risorsa" : embed_risorsa, #self.generateRandomEmbedding(1024),
                 "is_training" : is_training
             }]
+
+            self.log("Data to be inserted:")
+            self.log(str(dataR))
             self.risorsa_collection.insert(dataR)
+
             for j in range(0, amountChunck):
+                ID_chunck = f"{ID_univoco}_{j}"
+                ID_univoco_risorsa = ID_univoco
+                ID_counter = str(j)
+                embedding = np.asarray(embeddings["dense"][j], dtype=np.float32)#embeddings["dense"][j] #[j]["dense"], #generateRandomEmbedding(1024)#
+                relative_text = arrayToEmbed[j] 
+
+                self.log(f"""
+                    \n $ID_chunck -> {ID_chunck} - {type(ID_chunck)}
+                    \n $ID_chunck -> {ID_univoco_risorsa} - {type(ID_univoco_risorsa)}
+                    \n $ID_chunck -> {ID_counter} - {type(ID_counter)}
+                    \n $ID_chunck -> {len(embedding)} - {embedding} - {type(embedding)}
+                    \n $ID_chunck -> {relative_text} - {type(relative_text)}
+                    """)
+                
                 dataC = [{
-                    "ID_chunk" : f"{ID_univoco}_{j}",
-                    "ID_univoco_risorsa" : ID_univoco,
-                    "ID_counter" : j,
-                    "embedding" : embeddings["dense"][j], #generateRandomEmbedding(1024)#
-                    "relative_text" : embeddings["lyrics"][j] 
-                    # FieldSchema(name="ID_chunk", dtype=DataType.VARCHAR, max_length=22, is_primary=True),
-                    # FieldSchema(name="ID_univoco_risorsa", dtype=DataType.VARCHAR,  max_length=12),
+                    "ID_chunck" : ID_chunck,
+                    "ID_univoco_risorsa" : ID_univoco_risorsa,
+                    "ID_counter" : ID_counter,
+                    "embedding" : embedding,
+                    "relative_text" : relative_text
+                    # FieldSchema(name="ID_chunck", dtype=DataType.VARCHAR, max_length=26, is_primary=True),
+                    # FieldSchema(name="ID_univoco_risorsa", dtype=DataType.VARCHAR,  max_length=16),
                     # FieldSchema(name="ID_counter", dtype=DataType.VARCHAR, max_length=10),
                     # FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1024),
                     # FieldSchema(name="relative_text", dtype=DataType.VARCHAR, max_length=1000)
+                    
                 }]
                 self.chunk_collection.insert(dataC)
 

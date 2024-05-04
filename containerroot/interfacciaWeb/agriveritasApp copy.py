@@ -69,7 +69,6 @@ def IAResponse(regione="noRegionSelected"):
 
 
 def manageSmartResponse(query):
-    print(query)
     return "CIAO"
     # sampling_params = SamplingParams(temperature=0.8, top_p=0.95)
     
@@ -117,58 +116,71 @@ def manageSmartResponse(query):
 
 # #     return model_path
 
-# Usage
-# bge_m3_path = download_and_cache_bge_m3(CACHE_DIR)
-import os
-# Create the model download directory
-model_dir = "./models"
-os.makedirs(model_dir, exist_ok=True)
+# # # Usage
+# # bge_m3_path = download_and_cache_bge_m3(CACHE_DIR)
+# # bge_m3_ef = BGEM3EmbeddingFunction(
+# #     model_name='BAAI/bge-m3',
+# #     device='cuda',
+# #     use_fp16=True
+# # )
 
-# Set the TRANSFORMERS_CACHE environment variable
-os.environ["TRANSFORMERS_CACHE"] = model_dir
+from langchain_community.llms import VLLM
+from transformers import AutoTokenizer
 
-bge_m3_ef = BGEM3EmbeddingFunction(
-    model_name='BAAI/bge-m3',
-    device='cuda',
-    use_fp16=True
-)
+HF_TOKEN = "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"
+model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+login(token=HF_TOKEN)
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+terminators = [
+    tokenizer.eos_token_id,
+    tokenizer.convert_tokens_to_ids("<|eot_id|>")
+]
+llm = VLLM(
+        model=model_id, #"disi-unibo-nlp/Mixtral-8x7B-Instruct-v0.1-AWQ", #"TheBloke/Mistral-7B-Instruct-v0.2-AWQ",#"", #"disi-unibo-nlp/Mixtral-8x7B-Instruct-v0.1-AWQ", #disi-unibo-nlp/Mixtral-8x7B-Instruct-v0.1-AWQ",
+        trust_remote_code=True,  # mandatory for hf models
+        max_new_tokens=512,
+        temperature=0.9,
+        gpu_memory_utilization=.9,
+        top_p=1.0,
+        top_k=10,
+        download_dir = "./models",#"../preprocess/models",
+        use_beam_search=False,
+        dtype="auto",
+        stop=terminators,
+        #vllm_kwargs={ "enforce_eager": True, "quantization": "awq", "max_model_len": 4096}, #
+    )
 
-# from langchain_community.llms import VLLM
-# from transformers import AutoTokenizer
-# import os
 
-# HF_TOKEN = "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"
-# model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
-# login(token=HF_TOKEN)
-# tokenizer = AutoTokenizer.from_pretrained(model_id)
-# terminators = [
-#     tokenizer.eos_token_id,
-#     tokenizer.convert_tokens_to_ids("<|eot_id|>")
-# ]
-
-# # Decrease gpu_memory_utilization
-# gpu_memory_utilization = 0.7  # Try a lower value, e.g., 0.6
-
-# # Enforce eager mode
-# os.environ["TF_ENABLE_EAGER_EXECUTION"] = "1"
-
-# # Reduce max_num_seqs
-# max_num_seqs = 16  # Try a lower value, e.g., 8
-
-# llm = VLLM(
-#     model=model_id,
-#     trust_remote_code=True,  # mandatory for hf models
-#     max_new_tokens=512,
-#     temperature=0.9,
-#     gpu_memory_utilization=gpu_memory_utilization,
-#     top_p=1.0,
-#     top_k=10,
-#     download_dir="./models",
-#     use_beam_search=False,
-#     dtype="auto",
-#     stop=terminators,
-#     vllm_kwargs={"enforce_eager": True}, #, "quantization": "awq", "max_model_len": 4096
-# )
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8501)
+
+
+
+# if __name__ == '__main__':
+
+#     transformers.logging.set_verbosity(transformers.logging.INFO)
+
+#     # username = "JPIdeas"
+#     # password = "#Agriveritas2024"
+
+#     HF_TOKEN = "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"
+#     login(token=HF_TOKEN)
+
+#     # # Authenticate using transformers-cli
+#     # # result = transformers-cli login --username={username} --password={password}
+#     # # if result != "Login successful":
+#     # #     print("Failed to authenticate. Please check your credentials.")
+#     # #     exit(1)
+
+#     llm = LLM(model="meta-llama/Meta-Llama-3-8B-Instruct", dtype="auto") #meta-llama/Meta-Llama-3-8B
+#     app.run(host='0.0.0.0', port=8501)
+#     # transformers.logging.set_verbosity(transformers.logging.INFO)
+
+#     # username = "JPIdeas"
+#     # password = "#Agriveritas2024"
+
+#     # transformers.login(username, password)
+#     # llm = LLM(model="meta-llama/Meta-Llama-3-8B", dtype="auto")
+#     # app.run(host='0.0.0.0', port=8501)
+

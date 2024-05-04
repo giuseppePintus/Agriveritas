@@ -11,7 +11,8 @@ import time
 import datetime
 
 class SpiderER_PSR(BaseSpider):
-    name = 'spiER_PSR'
+    code_region = "ER-PSR"
+    name = f'spi{code_region}'
     
     start_urls = ["https://agrea.regione.emilia-romagna.it/", "https://agricoltura.regione.emilia-romagna.it/"]
     
@@ -19,8 +20,6 @@ class SpiderER_PSR(BaseSpider):
         'agrea.regione.emilia-romagna.it',
         "agricoltura.regione.emilia-romagna.it"
     ]
-
-    code_region = "ER_PSR"
     
     def complete_inizialization(self, item: WebDownloadedElement):
         item["domains"] = self.allowed_domains
@@ -30,7 +29,7 @@ class SpiderER_PSR(BaseSpider):
         # # This method should be implemented by the subclass if they need specific item creation
         # raise NotImplementedError("You must implement the method create_item()")
 
-    contains_keyword = ["PSR", "Piano di Sviluppo Rurale", "Sviluppo Rurale"]
+    contains_keyword = ["PSR", "Sviluppo Rurale"]
 
     mycounter = 0
 
@@ -43,14 +42,16 @@ class SpiderER_PSR(BaseSpider):
         b = str(response.body)
 
         timestamp = time.time()
+        
         human_readable_timestamp = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
         # self.log(f"FILE N {self.counter} - Time {human_readable_timestamp} [{timestamp} > {timestamp - self.lastTimestamp}]")
-        self.log(f"FILE N {self.counter} - Time {human_readable_timestamp} [{timestamp - self.lastTimestamp}] / {response.url}")
+        self.log(f"FILE N {self.mycounter} - Time {human_readable_timestamp} [{timestamp - self.lastTimestamp}] / {response.url}")
         self.lastTimestamp = timestamp
-        
+        self.mycounter = self.mycounter + 1
+
         if any(key in b for key in self.contains_keyword): # se è del PSR passalo alla pipeline
-            self.log(f"Passed file n {self.mycounter}")
-            self.mycounter = self.mycounter + 1
+            self.log(f"Passed file n {self.counter}")
+            
 
             item = self.create_item(response, hash_code)
             self.complete_inizialization(item=item)

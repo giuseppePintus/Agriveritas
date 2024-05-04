@@ -9,8 +9,6 @@ const IA_class = "userA"
 const Uman_class = "userQ"
 
 
-console.log("à -> " + getBasicURL())
-
 sendBut.addEventListener("click", () => {
     invokeQueryAnswer()
 })
@@ -116,10 +114,10 @@ function computeReponse(queryText){
         } else {
             appendMessage("ERRORE: RICARICARE LA PAGINA", IA_class, chatHistory)
         }
-        
     }
-    console.log("-> " +ip)
-    let urlTmp = ip+":"+port+"/"+query+"/"
+
+    // console.log("-> " +ip)
+    let urlTmp = getBasicURL()+"/"+query+"/"
     if (actRegCode != ""){
         urlTmp += actRegCode +"?qt="+queryText
     }   
@@ -150,10 +148,10 @@ function computeReponse(queryText){
 
 
 const whereAddRegion = document.getElementById("selecRegion")
-const regions = ["Veneto", "Emilia-Romagna", "Puglia"]
-const regionTextLinks = ["Avepa", "Agrea", "PSR"]
-const regionLinkLinks = ["https://www.avepa.it", "#", "#"]
-const regionCode = ["V", "ER", "P"]
+const regions = ["Emilia-Romagna"] //["Veneto", "Emilia-Romagna", "Puglia"]
+const regionTextLinks = ["Agrea"] //["Avepa", "Agrea", "PSR"]
+const regionLinkLinks = ["#"] //["https://www.avepa.it", "#", "#"]
+const regionCode = ["ER"] //["V", "ER", "P"]
 let actRegSelected = -1
 let actRegCode = "noRegionSelected"
 

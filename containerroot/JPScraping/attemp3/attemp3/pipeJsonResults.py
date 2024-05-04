@@ -43,7 +43,7 @@ class JsonPipeline(PipeInterface):
                 'timestamp_download': item.tableRow['timestamp_download'],
                 'timestamp_mod_author': item.tableRow['timestamp_mod_author'],
 
-                'embed_risorsa': item.tableRow['embed_risorsa'],
+                'embed_risorsa': item.tableRow['embed_risorsa'].tolist(),  # Convert numpy array to list,
                 'is_training': item.tableRow['is_training'],
                
                 'aborted': item.settingPart['aborted'],

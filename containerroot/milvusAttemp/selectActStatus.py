@@ -5,64 +5,79 @@ from pymilvus import connections, Collection, utility, FieldSchema, DataType, Co
 
 connections.connect("default", host="milvus-standalone", port="19530")   #host="milvus-standalone"
 
-# def create_collections():
-#     risorsa_schema = CollectionSchema(
-#         fields=[
-#             FieldSchema(name="ID_univoco", dtype=DataType.INT64, is_primary=True),
-#             FieldSchema(name="cod_regione", dtype=DataType.VARCHAR, max_length=2),
-#             FieldSchema(name="url", dtype=DataType.VARCHAR, max_length=300),
-#             FieldSchema(name="HTTP_status", dtype=DataType.INT16),
-#             FieldSchema(name="hash_code", dtype=DataType.VARCHAR, max_length=64),
-#             FieldSchema(name="file_name", dtype=DataType.VARCHAR, max_length=100),
-#             FieldSchema(name="file_dir", dtype=DataType.VARCHAR, max_length=300),
-#             FieldSchema(name="timestamp_download", dtype=DataType.INT32),
-#             FieldSchema(name="timestamp_mod_author", dtype=DataType.INT32),
-#             FieldSchema(name="vector", dtype=DataType.FLOAT_VECTOR, dim=128)  # Add a vector field
-#         ],
-#         description="RISORSA collection"
-#     )
+# risorsa_schema = CollectionSchema(
+#             fields=[
+#                 FieldSchema(name="ID_univoco", dtype=DataType.VARCHAR, max_length=16, is_primary=True),
+#                 FieldSchema(name="cod_regione", dtype=DataType.VARCHAR, max_length=6),
+#                 FieldSchema(name="ID_counter", dtype=DataType.VARCHAR, max_length=9),
 
-#     chunk_schema = CollectionSchema(
-#         fields=[
-#             FieldSchema(name="ID", dtype=DataType.VARCHAR, max_length=255, is_primary=True),
-#             FieldSchema(name="ID_univoco_risorsa", dtype=DataType.INT64),
-#             FieldSchema(name="ID_chunk", dtype=DataType.INT64),
-#             FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1024)
-#         ],
-#         description="CHUNK collection"
-#     )
+#                 FieldSchema(name="url_from", dtype=DataType.VARCHAR, max_length=2000),
+#                 FieldSchema(name="HTTP_status", dtype=DataType.INT16),
+#                 FieldSchema(name="hash_code", dtype=DataType.VARCHAR, max_length=64),
+#                 FieldSchema(name="file_name", dtype=DataType.VARCHAR, max_length=100),
+#                 FieldSchema(name="file_dir", dtype=DataType.VARCHAR, max_length=300),
+#                 FieldSchema(name="timestamp_download", dtype=DataType.INT64),
+#                 FieldSchema(name="timestamp_mod_author", dtype=DataType.INT64),
+                
+#                 FieldSchema(name="embed_risorsa", dtype=DataType.FLOAT_VECTOR, dim=1024),
+#                 FieldSchema(name="is_training", dtype=DataType.BOOL)
+#             ],
+#             description="RISORSA collection"
+#         )
 
-#     # Create the RISORSA collection
-#     risorsa_collection = Collection(name="RISORSA", schema=risorsa_schema)
+#         # Create the RISORSA collection
+#         risorsa_collection = Collection(name="RISORSA", schema=risorsa_schema)
 
-#     # Create an index on the primary key field "ID_univoco" for the RISORSA collection
-#     risorsa_collection.create_index(
-#         field_name="ID_univoco",
-#         index_params={"index_type": "STL_SORT"}
-#     )
+#         # Create an index on the primary key field "ID_univoco"
+#         risorsa_collection.create_index(
+#             field_name="ID_univoco",
+#             index_params={"index_type": "Trie"}
+#         )
 
-#     # Create an index on the vector field "vector" for the RISORSA collection
-#     risorsa_collection.create_index(
-#         field_name="vector",
-#         index_params={"index_type": "FLAT", "metric_type": "L2"}
-#     )
+#         # Create an index on the vector field "embed_risorsa"
+#         risorsa_collection.create_index(
+#             field_name="embed_risorsa",
+#             index_params={"index_type": "FLAT", "metric_type": "L2"}
+#         )
 
-#     # Create the CHUNK collection
-#     chunk_collection = Collection(name="CHUNK", schema=chunk_schema)
+#         # Create an index on the "cod_regione" field
+#         risorsa_collection.create_index(
+#             field_name="cod_regione",
+#             index_params={"index_type": "Trie"}
+#         )
 
-#     # Create an index on the primary key field "ID" for the CHUNK collection
-#     chunk_collection.create_index(
-#         field_name="ID",
-#         index_params={"index_type": "Trie"}
-#     )
 
-#     # Create an index on the vector field "embedding" for the CHUNK collection
-#     chunk_collection.create_index(
-#         field_name="embedding",
-#         index_params={"index_type": "FLAT", "metric_type": "L2"}
-#     )
 
-#     return [risorsa_collection, chunk_collection]
+# def create_collection_chunck(self):
+#         chunk_schema = CollectionSchema(
+#             fields=[
+#                 FieldSchema(name="ID_chunck", dtype=DataType.VARCHAR, max_length=26, is_primary=True),
+#                 FieldSchema(name="ID_univoco_risorsa", dtype=DataType.VARCHAR,  max_length=16),
+#                 FieldSchema(name="ID_counter", dtype=DataType.VARCHAR, max_length=10),
+#                 FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1024),
+#                 FieldSchema(name="relative_text", dtype=DataType.VARCHAR, max_length=1200) #un chuck era lungo 1005
+#             ],
+#             description="CHUNK collection"
+#         )
+
+#         # Create the CHUNK collection
+#         chunk_collection = Collection(name="CHUNK", schema=chunk_schema)
+
+#         # Create an index on the primary key field "ID_chunk"
+#         chunk_collection.create_index(
+#             field_name="ID_chunck",
+#             index_params={"index_type": "Trie"}
+#         )
+
+#         # Create an index on the vector field "embedding"
+#         chunk_collection.create_index(
+#             field_name="embedding",
+#             index_params={"index_type": "IVF_FLAT", "metric_type": "L2", "params": {"nlist": 2048}}
+#         )
+
+#         return chunk_collection
+
+
 
 
 import random
@@ -89,24 +104,51 @@ print("--> " + str(searchingChunk))
 results = chunk_collection.search(
     data = [searchingChunk], 
     anns_field = "embedding", 
-    limit=3, 
+    limit=5, 
     param={
         "metric_type": "L2", 
         "params": {
-            "nprobe": 10,
-            "topk": 5
-            }
+            "nprobe": 20,
+            },
+        "topk": 10
         },
-    output_fields=["ID_univoco_risorsa", "ID_chunk"]
+    output_fields=["ID_univoco_risorsa", "ID_counter", "relative_text"]
     )
 
+
+
+risposta = ""
+
 print("\n\n\n")
-print(results)
+print("Search Results:")
 print(type(results))
+for hits in results: # GUARDA https://milvus.io/api-reference/pymilvus/v2.4.x/ORM/Collection/search.md
+    for index, hit in enumerate(hits):
+        print(type(hit))
+        print(f"ID: {hit.id}") #.entity['ID_univoco_risorsa']} - {result.entity['ID_counter']}")
+        print(f"Distance {hit.score}") 
+        # print(f"Vector {hit.vector}") 
+        print(f"Relative Text: {hit.get('relative_text')}")
+        print("-" * 80)
+        risposta = risposta + str(index) + ") " + hit.get('relative_text') + "\n"
+
 print("\n\n\n")
+
+
+
 
 
 # # # Disconnect from the Milvus service
 connections.disconnect("default")
 
+domanda = "METTI QUI LA DOMANDA"
 
+regione = "Emilia Romagna"
+initLog = f"""Sei un esperto funzionario della AgEA dell' {regione} e il tuo compito è assistere delle persone che ti pongono delle domande
+            Di seguito quindi avrai un quesito e delle possibili risposte che possono risolvere il dubbio
+            Domanda: {domanda}
+            Possibili risposte: 
+            {risposta}
+            È di fondamentale importanza che tu risponda in italiano e usando il più possibile il lessico tecnico agronomico
+            """
+print(initLog)
