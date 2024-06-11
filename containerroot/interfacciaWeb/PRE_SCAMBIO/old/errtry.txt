@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "agriveritasApp.py", line 54, in <module>
+    from myModels import myModels
+  File "/home/jp/interfacciaWeb/myModels.py", line 4, in <module>
+    from transformers import AutoTokenizer
+  File "/usr/local/lib/python3.8/dist-packages/transformers/__init__.py", line 26, in <module>
+    from . import dependency_versions_check
+  File "/usr/local/lib/python3.8/dist-packages/transformers/dependency_versions_check.py", line 16, in <module>
+    from .utils.versions import require_version, require_version_core
+  File "/usr/local/lib/python3.8/dist-packages/transformers/utils/__init__.py", line 33, in <module>
+    from .generic import (
+  File "/usr/local/lib/python3.8/dist-packages/transformers/utils/generic.py", line 465, in <module>
+    import torch.utils._pytree as _torch_pytree
+  File "/usr/local/lib/python3.8/dist-packages/torch/__init__.py", line 27, in <module>
+    from ._utils import _import_dotted_name, classproperty
+  File "<frozen importlib._bootstrap>", line 991, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 975, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 671, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 844, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 928, in get_code
+  File "<frozen importlib._bootstrap_external>", line 381, in cache_from_source
+KeyboardInterrupt

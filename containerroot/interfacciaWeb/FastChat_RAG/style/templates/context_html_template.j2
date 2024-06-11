@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information Page</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;display=swap">
+    <style>
+        * {
+            font-family: "Source Sans Pro";
+        }
+
+        .doc-box {
+            padding: 12px;
+            margin-top: 12px;
+            background-color: #d7d0c4;
+            border-radius: 9px;
+            color: #111 !important;
+            box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 2px 0px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Fonti Giuridiche:</h2>
+{% for doc in documents %}
+    <div class="doc-box">
+        {{ doc }}
+    </div>
+{% endfor %}
+
+
+</body>
+</html>

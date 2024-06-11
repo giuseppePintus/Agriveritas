@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #333;
+      color: white;
+      margin: 0;
+      padding: 20px;
+      overflow-y: scroll;
+    }
+
+    h2 {
+      margin-bottom: 50px;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .document-card {
+      background-color: #fff;
+      color: #000; /* Ensure text inside the card is black */
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 400px;
+      box-sizing: border-box;
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    .document-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .tag-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #fff;
+      padding: 10px 20px;
+      box-sizing: border-box;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 1;
+    }
+
+    .tag-box {
+      display: inline-block;
+      background-color: #007BFF;
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 12px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+
+    .tag-box a {
+      color: black; /* Set the anchor text color to black */
+    }
+
+    .title-box {
+      background-color: #FF5733;
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 12px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+
+    .document-content {
+      font-size: 14px;
+      color: black; /* Set the text color to black */
+      max-height: 200px;
+      overflow-y: auto;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      white-space: normal;
+    }
+  </style>
+</head>
+
+<body>
+  <h2 style="text-align: center;">Le AgEA sono qui anche per te!</h2>
+  <h3 style="text-align: center;">Informazioni recuperate a supporto della risposta</h3>
+  <br><br>
+  <div class="container" data-theme="light">
+    {% for document in documents %}
+      <div class="document-card">
+        <div class="tag-container">
+          <div class="tag-box">Fonte: <a href="{{ document.source }}">{{ document.title }}</a></div>
+        </div>
+        <div class="document-content">{{ document.content }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</body>
+</html>

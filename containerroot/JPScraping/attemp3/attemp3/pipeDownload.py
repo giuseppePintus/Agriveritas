@@ -83,13 +83,14 @@ class PipeDownload(PipeInterface):
         fPN = self.getFullNamePath(urlCleaned, contentType, tabR["cod_reg"], doms)
 
         
-        # allowedExtensions = settings["allowedContentType"]
-        # if len(allowedExtensions) != 0:
-        #     _, fileExtension = os.path.splitext(fName)
-        #     fileExtension = fileExtension[1:].lower()  # Remove the dot and convert to lower case
+        allowedExtensions = settings["allowedContentType"]
+        if len(allowedExtensions) != 0:
+            _, fileExtension = os.path.splitext(fName)
+            self.log(f"FAMME VEDE -> {fName} / {fileExtension}")
+            fileExtension = fileExtension[1:].lower()  # Remove the dot and convert to lower case
 
-        #     if fileExtension not in allowedExtensions:
-        #         return self.skipElementForContentType(item)
+            if fileExtension not in allowedExtensions:
+                return self.skipElementForContentType(item)
             
 
         self.log("## path + nome :  " + fPN + "  #######")

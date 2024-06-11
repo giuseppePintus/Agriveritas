@@ -83,8 +83,9 @@ class BaseSpider(Spider):
         item.tableRow["timestamp_download"] = time.time()
         # item.tableRow.timestamp_mod_author = scrapy.Field()
         #embed_risorsa = scrapy.Field()
+        # True if "faq" in l else False
         item.tableRow["is_training"] = False if "faq" in str(response.url) else True
-
+        self.log(toLog=f" istrain?? --> {str(response.url)} -> {item.tableRow['is_training']}",aCapo=1 )
         ### qui ### ID_univoco = scrapy.Field()
         ### ragnoFiglio ### cod_reg = scrapy.Field()
         ### qui ### ID_counter = scrapy.Field()
@@ -104,7 +105,7 @@ class BaseSpider(Spider):
         #item.settingPart
         # aborted = scrapy.Field()
         item.settingPart["abortReason"] = ""
-        item.settingPart["allowedContentType"] = ["html", "pdf"] # scrapy.Field()
+        item.settingPart["allowedContentType"] = [".html", ".pdf", "html", "pdf"] # scrapy.Field()
 
         self.complete_inizialization(item)
         item.tableRow["ID_univoco"] = f"{item.tableRow['cod_reg']}_{item.tableRow['ID_counter']}"

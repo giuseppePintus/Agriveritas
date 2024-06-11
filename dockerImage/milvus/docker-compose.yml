@@ -33,13 +33,12 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
-      start_period: 0s
       timeout: 20s
       retries: 3
 
   standalone:
     container_name: milvus-standalone
-    image: milvusdb/milvus:v2.3.2
+    image: milvusdb/milvus:v2.4.3
     command: ["milvus", "run", "standalone"]
     security_opt:
     - seccomp:unconfined

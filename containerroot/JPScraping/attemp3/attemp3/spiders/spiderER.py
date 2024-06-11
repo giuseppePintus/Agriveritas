@@ -2,15 +2,15 @@ from attemp3.spiders.motherSpider import BaseSpider
 from attemp3.items import WebDownloadedElement
 
 class SpiderER(BaseSpider):
+    code_region = "ER"
     name = 'spiER'
     
-    start_urls = ["https://agrea.regione.emilia-romagna.it/"]
+    start_urls = ["https://agrea.regione.emilia-romagna.it/", "https://agricoltura.regione.emilia-romagna.it/"]
     
     allowed_domains = [
-        'agrea.regione.emilia-romagna.it'
+        'agrea.regione.emilia-romagna.it',
+        "agricoltura.regione.emilia-romagna.it"
     ]
-
-    code_region = "ER"
     
     def complete_inizialization(self, item: WebDownloadedElement):
         item["domains"] = self.allowed_domains

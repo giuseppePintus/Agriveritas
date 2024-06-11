@@ -126,6 +126,7 @@ class PipeMilvus(PipeInterface):
 
     def open_spider(self, spider):
         super().open_spider(spider)
+        
         connections.connect("default", host="milvus-standalone", port="19530")   #host="milvus-standalone"
         # risorsa_collection, chunk_collection = self.create_collections()
         

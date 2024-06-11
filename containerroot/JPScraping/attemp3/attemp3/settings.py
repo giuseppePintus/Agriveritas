@@ -70,8 +70,8 @@ ITEM_PIPELINES = {
     # "attemp3.pipeJPParser2.JPParser2": 203,
     "attemp3.pipeCsvResults.CsvPipeline" : 900,
     
-    "attemp3.pipeMilvus.PipeMilvus": 945,
-
+    "attemp3.pipeMilvus2.PipeMilvus2": 945, 
+    #"attemp3.pipeMilvus.PipeMilvus": 945,
     "attemp3.pipeJsonResults.JsonPipeline" : 955,
 }
 

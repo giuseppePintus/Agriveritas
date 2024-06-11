@@ -1,0 +1,8 @@
+body {
+    height: 100vh;
+    background-image: radial-gradient(white, lightgreen)
+}
+
+body header{
+    background-image: linear-gradient(lightgreen, white );
+}

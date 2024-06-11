@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #333; /* Dark background for contrast */
+      color: white; /* Set default text color to white */
+      margin: 0;
+      padding: 20px;
+      overflow-y: scroll
+    }
+
+    h2 {
+      margin-bottom: 50px; /* Add vertical space between the heading and the list of boxes */
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .document-card {
+      background-color: #fff;
+      color: #000; /* Ensure text inside the card is black for contrast */
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 150 px;
+      box-sizing: border-box;
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    .document-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .tag-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #fff;
+      padding: 10px 20px;
+      box-sizing: border-box;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 1;
+    }
+
+    .tag-box {
+      display: inline-block;
+      background-color: #007BFF;
+      /*color: white !important;*/
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 12px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+
+    .tag-box a{
+      color: black
+    }
+
+    .title-box {
+      background-color: #FF5733;
+      /*color: white !important;*/
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 12px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+
+    .document-content {
+      font-size: 14px;
+      color: black !important;
+      margin-top: 50px; /* Adjust this value to avoid overlapping with the tag-container */
+      max-height: 200px; /* Set the maximum height for the content */
+      overflow-y: auto; /* Add a vertical scrollbar if the content exceeds the max height */
+      overflow-wrap: break-word; /* Ensure text wraps within the box */
+      word-wrap: break-word; /* Ensure text wraps within the box */
+      white-space: normal; /* Ensure text wraps within the box */
+    }
+
+    .document-content span {
+      background-color: yellow;
+      color: black;
+    }
+
+  </style>
+</head>
+<body>
+  <h2 style="text-align: center;">
+  Le AgEA sono qui anche per te!
+  </h2>
+  <h3 style="text-align: center;">
+  Informazioni recuperate a supporto della risposta
+  </h3>
+  <!--
+  <p style="text-align: left; font-weight:normal;">
+  Sono evidenziate in giallo le informazioni più importanti contenute nei documenti selezioniati. E' possibile scorrere il testo di ciascuna fonte per visualizzare i dati più rilevanti.
+  </p>
+  -->
+  <br><br>
+  <div class="container" data-theme="light">
+    {% for document in documents %}
+      <div class="document-card">
+        <div class="tag-container">
+          <!--
+          <div class="tag-box">Fonte: <a href="{{ document.source }}"> {{ document.title }} </a> <div>
+          -->
+
+          <div class="tag-box">Fonte: <a href="{{ document.source }}">{{ document.title }}</a></div>
+
+          <!--
+          <div class="tag-box">Anno: {{ document.year }}</div>
+          <div class="title-box">Titolo: {{ document.title }}</div>
+          -->
+        
+        </div>
+
+        <div class="document-content" word-wrap: break-word;>{{ document.content }}</div>
+
+      </div>
+    {% endfor %}
+  </div>
+</body>
+</html>
