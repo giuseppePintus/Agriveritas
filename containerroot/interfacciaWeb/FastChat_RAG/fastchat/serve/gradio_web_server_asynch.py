@@ -369,7 +369,7 @@ def format_docs_for_cards(doc):
 
     out = {
         'source' : more_info.href,
-        'title' : more_info.title,
+        'title' : f"{more_info.title} {more_info.id_res}",
         # 'year' : metadata['year'],
         # 'title' : title,
         'content' : txt
