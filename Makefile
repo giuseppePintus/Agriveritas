@@ -1,43 +1,42 @@
 USER_CONTAINER=jp
 HOME_CONTAINER_DIR=/home/${USER_CONTAINER}
 LOCAL_DIR__ROOT_CONTAINER=containerroot
-EXAM_DIR__ROOT_CONTAINER=examroot
-DOCKER_IMAGE=agriveritas1
+DOCKER_IMAGE=agriveritas
 WEB_IMAGE=rag_gradio_image
 
 SCRAPY_ROOT_COMMAND=JPScraping/attemp3/e.sh
 
-region?=V
+region?=ER2PSR
 
 
 all:
 
 .PHONY: setupMachine openMachine clear basicDownload download milvusCheck createWeb
 
-setupMachine:
-	echo "->"${DOCKER_IMAGE}
+setupMachineAgriveritas:
+	echo "Building -> "${DOCKER_IMAGE}
 	docker build -t ${DOCKER_IMAGE} dockerImage/agriveritasMachine
-	# docker-compose -f dockerImage/docker-compose.yml build
-	# docker-compose -f dockerImage/docker-compose.yml up -d
 
-openMachine: 	
+setupMachineWeb:
+	echo "Building -> "${DOCKER_IMAGE}
+	docker build -t ${WEB_IMAGE} dockerImage/webapp
+
+setupMachineMilvusCompose:
+	echo "Building -> milvus compose"
+	-docker-compose -f dockerImage/miluvs/docker-compose.yml build
+	
+setup:
+	setupMachineAgriveritas
+	setupMachineWeb
+	setupMachineMilvusCompose
+
+
+openMachine:
 	docker run --rm -it\
 		--net milvus \
-		--gpus device=1 \
+		--gpus device=all \
 		-p 37336:8501 \
 		-v ./${LOCAL_DIR__ROOT_CONTAINER}:${HOME_CONTAINER_DIR} ${DOCKER_IMAGE} 
-
-
-INIT_EXAM = startExam.sh
-exam:
-	docker run --rm -it\
-		--net milvus \
-		--gpus device=2 \
-		-p 37336:8501 \
-		-v ./${EXAM_DIR__ROOT_CONTAINER}:${HOME_CONTAINER_DIR} \
-		${DOCKER_IMAGE} \
-		bash ${HOME_CONTAINER_DIR}/${INIT_EXAM} 
-
 
 clear:
 	-rm -rf containerroot/JPScraping/attemp3/download/${region}/*
@@ -59,11 +58,6 @@ basicDownload:
 download:
 	make safeclear region=${region}
 	make basicDownload region=${region}
-
-# downloadAll:
-# 	for R in ["ER", "V"]; do make clear region=${R}; make basicDownload region=${R}: done
-# 	# make basicDownload region=${region}
-
 
 MILVUS_ROOT_COMMAND=milvusAttemp/milvusSelect.sh
 
