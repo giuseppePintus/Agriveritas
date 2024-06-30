@@ -24,7 +24,6 @@ openMachine:
 	docker run --rm -it\
 		--net milvus \
 		--gpus device=1 \
-		-p 37336:8501 \
 		-v ./${LOCAL_DIR__ROOT_CONTAINER}:${HOME_CONTAINER_DIR} ${DOCKER_IMAGE} 
 
 
@@ -32,7 +31,7 @@ INIT_EXAM = startExam.sh
 exam:
 	docker run --rm -it\
 		--net milvus \
-		--gpus device=2 \
+		--gpus device=1 \
 		-p 37336:8501 \
 		-v ./${EXAM_DIR__ROOT_CONTAINER}:${HOME_CONTAINER_DIR} \
 		${DOCKER_IMAGE} \
@@ -138,4 +137,40 @@ createWeb3:
 		# FastChat_RAG \ 
 		# ${HOME_CONTAINER_DIR}/${GRADIO_ROOT_COMMAND} 
 
+WEB_CONTAINER="rag_gradio_container"
+openWebMachine:
+	docker start -i ${WEB_CONTAINER}
 
+
+
+
+DATASET_CREATION_ROOT_COMMAND=testing/createDataset.sh
+createDataset:
+	docker run --rm -it -v ./${LOCAL_DIR__ROOT_CONTAINER}:${HOME_CONTAINER_DIR} \
+			--gpus device=1 \
+			--net milvus \
+			${DOCKER_IMAGE} \
+			${HOME_CONTAINER_DIR}/${DATASET_CREATION_ROOT_COMMAND} 
+
+FALSE_CREATION_ROOT_COMMAND=testing/generateFalseResponse.sh
+genFalse:
+	docker run --rm -it -v ./${LOCAL_DIR__ROOT_CONTAINER}:${HOME_CONTAINER_DIR} \
+			--gpus device=1 \
+			${DOCKER_IMAGE} \
+			${HOME_CONTAINER_DIR}/${FALSE_CREATION_ROOT_COMMAND} 
+
+EXTRACT_MILVUS_ROOT_COMMAND=testing/extractMilvus.sh
+extractChunk:
+	docker run --rm -it -v ./${LOCAL_DIR__ROOT_CONTAINER}:${HOME_CONTAINER_DIR} \
+			--net milvus \
+			${DOCKER_IMAGE} \
+			${HOME_CONTAINER_DIR}/${EXTRACT_MILVUS_ROOT_COMMAND} 
+
+
+
+TMP_ROOT_COMMAND=testing/tmp.sh
+tmp:
+	docker run --rm -it -v ./${LOCAL_DIR__ROOT_CONTAINER}:${HOME_CONTAINER_DIR} \
+			--net milvus \
+			${DOCKER_IMAGE} \
+			${HOME_CONTAINER_DIR}/${TMP_ROOT_COMMAND} 
