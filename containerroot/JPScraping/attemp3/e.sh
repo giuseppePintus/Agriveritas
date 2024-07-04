@@ -5,7 +5,7 @@ pwd
 cd /home/jp/JPScraping/attemp3
 pwd
 
-echo "CIAO -> " ${region} " <-"
+echo "RECEIVED -> " ${region} " <-"
 
 # echo "" > myLogSpider.txt
 /usr/local/bin/scrapy crawl spi${region} --logfile JPSLog${region}.txt

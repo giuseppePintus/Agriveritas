@@ -1,4 +1,0 @@
-fastchat==0.1.0
-fschat[model_worker,webui]
-vllm==0.3.3
-markdown

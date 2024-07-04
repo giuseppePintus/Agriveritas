@@ -33,7 +33,10 @@ class PipeInterface(FilesPipeline):
 
     def open_spider(self, spider):
         super().open_spider(spider)
-        self.logFile += spider.code_region + ".txt"
+        self.logFile = "log/" + self.logFile + spider.code_region + ".txt"
+        dir_path = os.path.dirname(self.logFile)
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
         self.pdLogFile = open(self.logFile, "w")
         
     def close_spider(self, spider):

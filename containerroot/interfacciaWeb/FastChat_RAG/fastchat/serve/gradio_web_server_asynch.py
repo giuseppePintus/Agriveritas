@@ -151,6 +151,18 @@ model_to_name_dict = {
 }
 
 
+region_to_code = {
+    "Emilia Romagna - solo risorse PSR" : "ER1PSR",
+    "Veneto" : "V"
+}
+
+code_to_region = {
+    "ER1PSR" : "Emilia Romagna - solo risorse PSR",
+    "V" : "Veneto"
+}
+
+
+
 # Encoder commont to everybody
 # TODO: make access parallels using a controller
 logger.info("Loading retrieval models")
@@ -213,7 +225,7 @@ logger.info(f'collection: {collection.name} has {collection.num_entities} entiti
 # # )
 
 #chunkCollectionName = "newRisorsa"
-risorsaCollectionName = "newRisorsa"
+risorsaCollectionName = "risorsa"
 from pymilvus import connections, Collection, utility, FieldSchema, DataType, CollectionSchema, MilvusClient
 milvusClient = MilvusClient(uri="http://milvus-standalone:19530")
 
@@ -369,7 +381,7 @@ def format_docs_for_cards(doc):
 
     out = {
         'source' : more_info.href,
-        'title' : f"{more_info.title} {more_info.id_res}",
+        'title' : f"{more_info.title}", #f"{more_info.title} {more_info.id_res}"
         # 'year' : metadata['year'],
         # 'title' : title,
         'content' : txt
