@@ -1,0 +1,11 @@
+scrapy
+beautifulsoup4
+pymilvus
+pymilvus[model]
+milvus-model==0.2.0
+numpy==1.19.5
+
+langchain
+langchain-community
+
+milvus_cli
