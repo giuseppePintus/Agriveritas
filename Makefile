@@ -18,7 +18,7 @@ WEB_PORT=37330
 
 all:
 
-.PHONY: setupMachine openMachine restartMilvusDb createMilvusDb setupWebMachine initPrg clear safeclear basicDownload download downloadAll test openWebApp openWebMachine
+.PHONY: setupMachine openMachine restartMilvusDb createMilvusDb setupWebMachine initPrg clear safeclear basicDownload download downloadAll test openWebApp openWebMachine crawl_website
 
 
 ### creazione container docker ##################### 
@@ -176,5 +176,5 @@ crawl_website:
 
 #resetta e avvia nuovo crawling
 crawl_reset:
-    make safeclear config=${config} \
+	make safeclear config=${config} \
 	make crawl_website config=${config}
