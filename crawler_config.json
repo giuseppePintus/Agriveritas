@@ -1,0 +1,19 @@
+{
+    "crawl_config": {
+      "start_urls": ["https://example1.com", "https://example2.com"],
+      "allowed_domains": ["example1.com", "example2.com"],
+      "content_settings": {
+        "allowed_content_types": ["html", "pdf"],
+        "max_depth": 3,
+        "chunk_size": 1000,
+        "chunk_overlap": 200
+      },
+      "output_settings": {
+        "collection_name": "custom_collection",
+        "metadata": {
+          "source": "user_input",
+          "category": "custom"
+        }
+      }
+    }
+  }
