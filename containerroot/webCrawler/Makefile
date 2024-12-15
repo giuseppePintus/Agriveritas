@@ -15,7 +15,9 @@ crawl:
         ${CRAWLER_IMAGE} \
         scrapy crawl general \
         -a config_file=/crawler/config/crawler_config.json \
-        -a site=${site}
+        -a site=${site} \
+        --logfile=/crawler/logs/crawler.log \
+        -L DEBUG
 
 clean:
 	rm -rf output/* logs/*
