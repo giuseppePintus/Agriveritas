@@ -7,12 +7,16 @@ from datetime import datetime
 class GeneralSpider(scrapy.Spider):
     name = "general"
     
-    def __init__(self, config_file=None, *args, **kwargs):
+    def __init__(self, config_file=None, site=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.config = self._load_config(config_file)
-        self.start_urls = self.config["crawl_config"]["start_urls"]
-        self.allowed_domains = self.config["crawl_config"]["allowed_domains"]
-        self.settings = self.config["crawl_config"]["content_settings"]
+        if not site or site not in self.config["sites"]:
+            raise ValueError(f"Site {site} not found in config")
+        self.site = site
+        self.site_config = self.config["sites"][site]
+        self.settings = self.config["settings"]
+        self.start_urls = self.site_config["start_urls"]
+        self.allowed_domains = self.site_config["allowed_domains"]
         
     def _load_config(self, config_file):
         with open(config_file) as f:
@@ -48,13 +52,14 @@ class GeneralSpider(scrapy.Spider):
         
     def _save_chunk(self, chunk, url, index):
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        output_dir = f"/crawler/output/{timestamp}"
+        output_dir = f"/crawler/output/{self.site}/{timestamp}"
         os.makedirs(output_dir, exist_ok=True)
         
         metadata = {
             "url": url,
+            "site": self.site,
             "chunk_index": index,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": timestamp
         }
         
         filename = f"{output_dir}/chunk_{index}.txt"
