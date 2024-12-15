@@ -35,14 +35,9 @@ class SettingsElement(scrapy.Item):
 
 class WebDownloadedElement(scrapy.Item):
     response = scrapy.Field()
-    tableRow = TableRowInfos() #requiredMainTableInfo,
+    tableRow = TableRowInfos()
     domains = scrapy.Field()
     settingPart = SettingsElement()
-
-    # def __init__(self, response, domains):
-    #     super().__init__()
-    #     self['response'] = response
-    #     self['domains'] = domains
-    #     self['tableRow'] = TableRowInfos()
-    #     self['settingPart'] = SettingsElement()
-    
+    content_type = scrapy.Field()
+    text_content = scrapy.Field()
+    metadata = scrapy.Field()

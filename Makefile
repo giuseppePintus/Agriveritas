@@ -163,4 +163,11 @@ other:
 			--gpus device=0 \
 			--net milvus \
 			${DOCKER_IMAGE} \
-			${HOME_CONTAINER_DIR}/${OTHER_COMMAND} 
+			${HOME_CONTAINER_DIR}/${OTHER_COMMAND}
+
+crawl_website:
+	docker run --rm -it --net milvus -v ./${LOCAL_DIR__ROOT_CONTAINER}:${HOME_CONTAINER_DIR} \
+			-e CONFIG_FILE=${config} \
+			--gpus device=00 \
+			${DOCKER_IMAGE} \
+			scrapy crawl general_crawler -a config_file=${config}

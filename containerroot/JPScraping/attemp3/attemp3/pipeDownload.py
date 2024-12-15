@@ -7,6 +7,7 @@ import re
 from attemp3.spiders.motherSpider import BaseSpider
 from attemp3.items import WebDownloadedElement
 import hashlib
+from datetime import datetime
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
@@ -120,6 +121,19 @@ class PipeDownload(PipeInterface):
     
         
         self.log(aCapo=7)
+
+        # Extract text content
+        if resp.headers.get('Content-Type', b'').startswith(b'text/html'):
+            item['text_content'] = ' '.join(resp.css('body ::text').getall())
+        
+        # Store metadata
+        item['metadata'] = {
+            'url': resp.url,
+            'timestamp': datetime.now().isoformat(),
+            'title': ' '.join(resp.css('title ::text').getall()),
+            'headers': dict(resp.headers)
+        }
+
         return item
     
     def skipElementForContentType(self, item : WebDownloadedElement):

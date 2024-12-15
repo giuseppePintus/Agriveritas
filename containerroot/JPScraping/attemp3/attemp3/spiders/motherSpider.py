@@ -125,3 +125,21 @@ class BaseSpider(Spider):
     def complete_inizialization(self, item):
         # This method should be implemented by the subclass if they need specific item creation
         raise NotImplementedError("This is mother spider, you have to summon a child before use it!")
+
+class GeneralWebSpider(BaseSpider):
+    name = "general_crawler"
+    
+    def __init__(self, start_urls=None, allowed_domains=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.start_urls = start_urls.split(',') if start_urls else []
+        self.allowed_domains = allowed_domains.split(',') if allowed_domains else []
+        
+    def parse(self, response):
+        # Create item for current page
+        item = self.create_item(response, self.generate_hash(response.url))
+        yield item
+        
+        # Follow links
+        for next_page in response.css('a::attr(href)').getall():
+            if next_page:
+                yield response.follow(next_page, self.parse)
