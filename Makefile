@@ -80,7 +80,7 @@ basicDownload:
 		-e region=${region} \
 		--gpus device=00 \
 		${DOCKER_IMAGE} \
-		${HOME_CONTAINER_DIR}/${SCRAPY_ROOT_COMMAND} ${region}
+		${HOME_CONTAINER_DIR}/${SCRAPY_ROOT_COMMAND}
 	
 
 #resetta il mapping locale e riparte un nuovo download
@@ -165,9 +165,16 @@ other:
 			${DOCKER_IMAGE} \
 			${HOME_CONTAINER_DIR}/${OTHER_COMMAND}
 
+#avvia il processo di scraping generico usando un file di configurazione
 crawl_website:
-	docker run --rm -it --net milvus -v ./${LOCAL_DIR__ROOT_CONTAINER}:${HOME_CONTAINER_DIR} \
-			-e CONFIG_FILE=${config} \
-			--gpus device=00 \
-			${DOCKER_IMAGE} \
-			/bin/bash -c "cd ${HOME_CONTAINER_DIR}/JPScraping/attemp3 && scrapy crawl general_crawler -a config_file=${config}"
+    echo "Starting general crawler with config: "${config}
+    docker run --rm -it --net milvus -v ./${LOCAL_DIR__ROOT_CONTAINER}:${HOME_CONTAINER_DIR} \
+        -e CONFIG_FILE=${config} \
+        --gpus device=00 \
+        ${DOCKER_IMAGE} \
+        ${HOME_CONTAINER_DIR}/${SCRAPY_ROOT_COMMAND}
+
+#resetta e avvia nuovo crawling
+crawl_reset:
+    make safeclear config=${config}
+    make crawl_website config=${config}
