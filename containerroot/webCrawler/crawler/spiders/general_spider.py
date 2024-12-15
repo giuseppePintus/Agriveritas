@@ -10,19 +10,28 @@ class GeneralSpider(scrapy.Spider):
     
     def __init__(self, config_file=None, site=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Setup logging
         self.logger.setLevel(logging.DEBUG)
         
-        self.logger.info(f"Initializing spider with config: {config_file} for site: {site}")
+        if not config_file:
+            raise ValueError("config_file is required")
         
         self.config = self._load_config(config_file)
         if not site or site not in self.config["sites"]:
-            self.logger.error(f"Site {site} not found in config")
             raise ValueError(f"Site {site} not found in config")
             
         self.site = site
         self.site_config = self.config["sites"][site]
-        self.settings = self.config["settings"]
+        self.settings = self.config.get("settings", {})
+        
+        # Validate required settings
+        if not self.settings.get("chunk_size"):
+            self.logger.warning("chunk_size not specified in settings, using default: 1000")
+            self.settings["chunk_size"] = 1000
+        
+        if not self.settings.get("chunk_overlap"):
+            self.logger.warning("chunk_overlap not specified in settings, using default: 200")
+            self.settings["chunk_overlap"] = 200
+        
         self.start_urls = self.site_config["start_urls"]
         self.allowed_domains = self.site_config["allowed_domains"]
         
@@ -65,14 +74,25 @@ class GeneralSpider(scrapy.Spider):
                 yield response.follow(link, self.parse)
                 
     def _create_chunks(self, text):
-        chunk_size = self.settings["chunk_size"]
-        overlap = self.settings["chunk_overlap"]
+        # Get chunk size with default value if not in settings
+        chunk_size = self.settings.get("chunk_size", 1000)  # Default 1000 if not specified
+        overlap = self.settings.get("chunk_overlap", 200)   # Default 200 if not specified
+        
+        self.logger.debug(f"Creating chunks with size: {chunk_size} and overlap: {overlap}")
+        
         chunks = []
+        if not text:
+            self.logger.warning("Empty text received for chunking")
+            return chunks
+            
         start = 0
         while start < len(text):
             end = start + chunk_size
-            chunks.append(text[start:end])
+            chunk = text[start:end]
+            chunks.append(chunk)
+            self.logger.debug(f"Created chunk {len(chunks)} with length {len(chunk)}")
             start = end - overlap
+            
         return chunks
         
     def _save_chunk(self, chunk, url, index):
