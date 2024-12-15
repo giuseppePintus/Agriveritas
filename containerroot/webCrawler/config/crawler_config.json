@@ -1,0 +1,12 @@
+{
+  "crawl_config": {
+    "start_urls": ["https://example.com"],
+    "allowed_domains": ["example.com"],
+    "content_settings": {
+      "allowed_content_types": ["text/html"],
+      "max_depth": 3,
+      "chunk_size": 1000,
+      "chunk_overlap": 200
+    }
+  }
+}
