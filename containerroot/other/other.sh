@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd home/jp/other
+cd home/pintus/other
 python3 other.py

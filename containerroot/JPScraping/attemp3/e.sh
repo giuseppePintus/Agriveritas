@@ -1,8 +1,8 @@
 #!/bin/bash
 
 pwd
-# Change to the project directory
-cd /home/jp/JPScraping/attemp3
+# Change from /home/jp to /home/pintus
+cd /home/pintus/JPScraping/attemp3
 pwd
 
 echo "RECEIVED -> " ${region} " <-"
