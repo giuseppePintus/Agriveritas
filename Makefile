@@ -170,4 +170,4 @@ crawl_website:
 			-e CONFIG_FILE=${config} \
 			--gpus device=00 \
 			${DOCKER_IMAGE} \
-			scrapy crawl general_crawler -a config_file=${config}
+			/usr/local/bin/scrapy crawl general_crawler -a config_file=${config}
