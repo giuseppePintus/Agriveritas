@@ -5,16 +5,15 @@ CONFIG_DIR=config
 .PHONY: build run clean
 
 build:
-    docker build -t ${CRAWLER_IMAGE} ${DOCKER_DIR}
+    docker build -t ${CRAWLER_IMAGE} .
 
 run:
-    docker run --rm -v ${PWD}/config:/crawler/config \
+    docker run --rm \
+        -v ${PWD}/config:/crawler/config:ro \
         -v ${PWD}/output:/crawler/output \
         -v ${PWD}/logs:/crawler/logs \
         ${CRAWLER_IMAGE} \
-        python -m scrapy crawl general \
-        -a config_file=/crawler/config/crawler_config.json
+        scrapy crawl general -a config_file=/crawler/config/crawler_config.json
 
 clean:
-    rm -rf output/*
-    rm -rf logs/*
+    rm -rf output/* logs/*
