@@ -176,5 +176,5 @@ crawl_website:
 
 #resetta e avvia nuovo crawling
 crawl_reset:
-    make safeclear config=${config}
+    make safeclear config=${config} \
     make crawl_website config=${config}
