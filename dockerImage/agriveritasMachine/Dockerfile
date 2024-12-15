@@ -1,13 +1,10 @@
 FROM huggingface/transformers-pytorch-latest-gpu
+#FROM nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu20.04
+
+#RUN apt-get update && apt-get install -y python3 python3-pip
 
 COPY scrapingRequirement.txt .
-
-# Fix potential conflicts
-RUN pip uninstall -y urllib3 transformers FlagEmbedding
-RUN pip install -r scrapingRequirement.txt
-
-# Add environment check
-RUN python -c "import transformers; import urllib3; print('Dependencies OK')"
+RUN pip3 install -r scrapingRequirement.txt
 
 ### cambiata interfaccia web ###
 #COPY webRequirement.txt .

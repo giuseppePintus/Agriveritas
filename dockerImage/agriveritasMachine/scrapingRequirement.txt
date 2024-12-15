@@ -9,8 +9,3 @@ langchain
 langchain-community
 
 milvus_cli
-urllib3==1.26.6
-transformers==4.30.0
-torch>=2.0.0
-scrapy==2.11.2
-FlagEmbedding
