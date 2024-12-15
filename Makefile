@@ -80,7 +80,7 @@ basicDownload:
 		-e region=${region} \
 		--gpus device=00 \
 		${DOCKER_IMAGE} \
-		${HOME_CONTAINER_DIR}/${SCRAPY_ROOT_COMMAND}
+		${HOME_CONTAINER_DIR}/${SCRAPY_ROOT_COMMAND} ${region}
 	
 
 #resetta il mapping locale e riparte un nuovo download
