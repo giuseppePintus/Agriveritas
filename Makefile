@@ -170,4 +170,4 @@ crawl_website:
 			-e CONFIG_FILE=${config} \
 			--gpus device=00 \
 			${DOCKER_IMAGE} \
-			/usr/local/bin/scrapy crawl general_crawler -a config_file=${config}
+			/bin/bash -c "cd ${HOME_CONTAINER_DIR}/JPScraping/attemp3 && scrapy crawl general_crawler -a config_file=${config}"
